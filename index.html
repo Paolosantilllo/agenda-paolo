@@ -857,20 +857,30 @@
 
   // ✅ Fix iOS: un tap sull'overlay apre subito la rotellina (quando possibile)
   function setupTimeFix(){
-    const ora = document.getElementById("mOra");
-    const tap = document.querySelector(".timeTap");
-    const cliente = document.getElementById("mCliente");
+  const ora = document.getElementById("mOra");
+  const tap = document.querySelector(".timeTap");
+  const cliente = document.getElementById("mCliente");
 
-    if(!ora || !tap) return;
+  if(!ora || !tap) return;
 
-    tap.addEventListener("click", () => {
-      ora.focus();
+  // apre la rotellina al primo tap
+  tap.addEventListener("click", () => {
+    ora.focus();
 
-      if (typeof ora.showPicker === "function") {
-        try { ora.showPicker(); return; } catch {}
-      }
-      try { ora.click(); } catch {}
-    });
+    if (typeof ora.showPicker === "function") {
+      try { ora.showPicker(); return; } catch {}
+    }
+
+    try { ora.click(); } catch {}
+  });
+
+  // 👇 passa a Cliente SOLO quando chiudi la rotellina (tasto blu)
+  ora.addEventListener("blur", () => {
+    if (ora.value && cliente) {
+      setTimeout(()=>cliente.focus(), 120);
+    }
+  });
+}
 
     // quando scegli l’ora -> focus su Cliente
     ora.addEventListener("change", () => {
