@@ -34,6 +34,7 @@
       color:var(--text);
     }
 
+    /* Top bar stile iOS */
     .topbar{
       position:sticky; top:0; z-index:10;
       background:rgba(245,239,255,.82);
@@ -76,6 +77,7 @@
     }
     .navBtn:hover{ background: rgba(0,0,0,.05); }
 
+    /* Totale mese sotto al mese */
     .monthTotal{
       text-align:center;
       margin-top:6px;
@@ -85,6 +87,7 @@
       letter-spacing:.1px;
     }
 
+    /* Calendar grid */
     .container{
       padding: 12px 14px 90px;
       max-width: 880px;
@@ -143,6 +146,7 @@
 
     .day.past{ opacity: 0.35; }
 
+    /* Colori in base agli appuntamenti rimanenti */
     .day.level-green{
       background: rgba(52,199,89,.12);
       outline: 2px solid rgba(52,199,89,.18);
@@ -155,6 +159,8 @@
       background: rgba(255,59,48,.14);
       outline: 2px solid rgba(255,59,48,.22);
     }
+
+    /* se selezionato, vince la selezione */
     .day.selected.level-green,
     .day.selected.level-yellow,
     .day.selected.level-red{
@@ -163,6 +169,7 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
+    /* badge rimanenti */
     .dayCount{
       position:absolute;
       right:6px;
@@ -180,6 +187,7 @@
     .dayCount.level-yellow{ background: var(--yellow); color:#2b2300; }
     .dayCount.level-red{ background: var(--red); }
 
+    /* totale € mini nel giorno (solo giorni passati + soldi visibili) */
     .dayTotalMini{
       position:absolute;
       left:6px;
@@ -189,6 +197,7 @@
       color: var(--accent);
     }
 
+    /* Events list */
     .section{ margin-top: 14px; }
     .sectionHeader{
       display:flex; align-items:center; justify-content:space-between;
@@ -200,6 +209,7 @@
       font-weight:900;
     }
 
+    /* Totali Giorno/Settimana: stesso stile del Totale mese */
     .totalsRow{
       font-size:13px;
       font-weight:900;
@@ -244,6 +254,8 @@
       font-weight:900;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
+
+    /* importo: stesso colore del Totale mese quando visibile */
     .eventSub{
       font-size:13px;
       margin-top:2px;
@@ -282,6 +294,7 @@
       border: 1px solid rgba(255,59,48,.20);
     }
 
+    /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background: rgba(0,0,0,.35);
@@ -328,24 +341,6 @@
       background: rgba(255,255,255,.55);
     }
 
-    .pickerBtn{
-      width:100%;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(17,17,17,.10);
-      font-size: 16px;
-      box-sizing:border-box;
-      background: rgba(255,255,255,.55);
-      text-align:left;
-      cursor:pointer;
-      font-weight:900;
-      color: var(--text);
-    }
-    .pickerBtn .hint{
-      color: var(--muted);
-      font-weight:800;
-    }
-
     .primary{
       width:100%;
       margin-top: 12px;
@@ -360,6 +355,7 @@
       box-shadow: 0 14px 30px rgba(123,75,255,.25);
     }
 
+    /* Floating + button */
     .fab{
       position:fixed;
       right: 16px;
@@ -383,56 +379,9 @@
       box-shadow: none;
     }
 
-    /* mini picker sheet */
-    .sheetBack{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.35);
-      display:none;
-      align-items:flex-end;
-      z-index:200;
-    }
-    .sheet{
-      width:100%;
-      background: rgba(248,243,255,.98);
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      padding: 12px 14px 16px;
-      border: 1px solid rgba(17,17,17,.06);
-      box-shadow: 0 -16px 40px rgba(0,0,0,.22);
-    }
-    .sheetHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom: 10px;
-    }
-    .sheetTitle{ font-weight:900; }
-    .sheetActions{
-      display:flex; gap:10px; align-items:center;
-    }
-    .sheetBtn{
-      border:none;
-      background: rgba(123,75,255,.10);
-      border: 1px solid rgba(123,75,255,.16);
-      border-radius: 12px;
-      padding: 8px 10px;
-      cursor:pointer;
-      font-weight:900;
-      color:#3f2db3;
-    }
-    select.timeSelect{
-      width:100%;
-      font-size:18px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(17,17,17,.10);
-      background: rgba(255,255,255,.65);
-      font-weight:900;
-    }
-
     @media (min-width: 720px){
       .modalBack{ align-items:center; justify-content:center; }
       .modal{ width: 520px; border-radius: 24px; }
-      .sheetBack{ align-items:center; justify-content:center; }
-      .sheet{ width: 520px; border-radius: 24px; }
     }
   </style>
 </head>
@@ -444,7 +393,7 @@
       <div class="title">Calendario</div>
 
       <div style="display:flex; gap:10px;">
-        <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
+        <button class="btnIcon moneyOff" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
         <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
       </div>
     </div>
@@ -491,10 +440,8 @@
       <input class="input" type="date" id="mData">
 
       <div class="fieldLabel">Ora</div>
-      <button class="pickerBtn" id="timeBtn" onclick="openTimeSheet()">
-        <span id="timeBtnText" class="hint">Seleziona ora</span>
-      </button>
-      <input type="hidden" id="mOra">
+      <!-- ✅ Rotellina iPhone -->
+      <input class="input" type="time" id="mOra" step="300">
 
       <div class="fieldLabel">Cliente</div>
       <input class="input" type="text" id="mCliente" placeholder="Nome cliente">
@@ -507,25 +454,11 @@
     </div>
   </div>
 
-  <!-- TIME SHEET -->
-  <div class="sheetBack" id="sheetBack" onclick="closeTimeIfBackdrop(event)">
-    <div class="sheet">
-      <div class="sheetHeader">
-        <div class="sheetTitle">Seleziona ora</div>
-        <div class="sheetActions">
-          <button class="sheetBtn" onclick="closeTimeSheet()">Annulla</button>
-          <button class="sheetBtn" onclick="confirmTimeSheet()">OK</button>
-        </div>
-      </div>
-      <select class="timeSelect" id="timeSelect"></select>
-    </div>
-  </div>
-
 <script>
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
 
-  // privacy: sempre nascosto quando riapri
+  // ✅ privacy: SEMPRE nascosto quando riapri
   let hideMoney = true;
 
   function toggleMoney(){
@@ -575,6 +508,7 @@
     return dayKey(iso) < todayKey();
   }
 
+  // ✅ blocca data/ora passata (oggi incluso)
   function isPastDateTime(isoDate, hhmm){
     const now = new Date();
 
@@ -614,6 +548,7 @@
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
+  // ✅ rimanenti: cala quando gli appuntamenti sono passati (solo oggi)
   function countRemainingForDay(iso){
     if (isPastDay(iso)) return 0;
 
@@ -715,6 +650,7 @@
       const level = levelFromRemaining(remaining);
       const total = totalForDay(iso);
 
+      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
       const showDayTotal = (!hideMoney && isPast && total > 0);
       const levelClass = level ? ` level-${level}` : "";
 
@@ -806,18 +742,7 @@
 
   let editingId = null;
 
-  function setTimeBtnText(value){
-    const t = document.getElementById("timeBtnText");
-    if(!t) return;
-    if(!value){
-      t.textContent = "Seleziona ora";
-      t.classList.add("hint");
-    } else {
-      t.textContent = value;
-      t.classList.remove("hint");
-    }
-  }
-
+  // ✅ + apre popup e NON mette focus su niente
   function openAddModal(){
     if (isPastDay(selectedDate)) {
       alert("Non puoi aggiungere appuntamenti in una data passata.");
@@ -829,12 +754,12 @@
     document.getElementById("saveBtn").innerText = "Salva";
 
     document.getElementById("mData").value = selectedDate;
-    document.getElementById("mOra").value = "";
-    setTimeBtnText("");
+    document.getElementById("mOra").value = "";        // vuoto: iOS può partire dall'ora attuale
     document.getElementById("mCliente").value = "";
     document.getElementById("mPrezzo").value = "";
 
     openModal();
+    // nessun focus: tocchi tu "Ora"
   }
 
   function openEditModal(id){
@@ -847,7 +772,6 @@
 
     document.getElementById("mData").value = e.date;
     document.getElementById("mOra").value = e.time || "";
-    setTimeBtnText(e.time || "");
     document.getElementById("mCliente").value = e.cliente || "";
     document.getElementById("mPrezzo").value = e.prezzo ?? "";
 
@@ -920,65 +844,18 @@
       .replaceAll("'","&#039;");
   }
 
-  // ===== Time sheet =====
-  let tempTime = "";
-
-  function buildTimeOptions(){
-    const sel = document.getElementById("timeSelect");
-    if(!sel) return;
-    sel.innerHTML = "";
-    for(let h=0; h<24; h++){
-      for(let m=0; m<60; m+=5){
-        const v = String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
-        const opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = v;
-        sel.appendChild(opt);
-      }
-    }
-  }
-
-  function openTimeSheet(){
-    // scegli tu l’ora: apriamo sempre la lista
-    const current = document.getElementById("mOra").value || "";
-    tempTime = current;
-
-    const sel = document.getElementById("timeSelect");
-    if(!sel) return;
-
-    if(!sel.options.length) buildTimeOptions();
-
-    // se non c'è ora selezionata, mettiamo in evidenza 09:00 (neutro), NON l’ora attuale
-    sel.value = current || "09:00";
-
-    document.getElementById("sheetBack").style.display = "flex";
-  }
-
-  function closeTimeSheet(){
-    document.getElementById("sheetBack").style.display = "none";
-  }
-  function closeTimeIfBackdrop(evt){
-    if(evt.target.id === "sheetBack") closeTimeSheet();
-  }
-
-  function confirmTimeSheet(){
-    const sel = document.getElementById("timeSelect");
-    const v = sel ? sel.value : "";
-    document.getElementById("mOra").value = v;
-    setTimeBtnText(v);
-    closeTimeSheet();
-
-    // ✅ dopo la conferma passa automaticamente a Cliente
-    setTimeout(() => {
-      const c = document.getElementById("mCliente");
-      if(c) c.focus();
-    }, 80);
-  }
-
-  // ===== Flow Cliente -> Prezzo =====
+  // ✅ Flow: quando scegli l'ora -> focus su Cliente
   function setupModalFlow(){
+    const ora = document.getElementById("mOra");
     const cliente = document.getElementById("mCliente");
     const prezzo = document.getElementById("mPrezzo");
+
+    if(ora && cliente){
+      ora.addEventListener("change", () => {
+        if (ora.value) setTimeout(()=>cliente.focus(), 80);
+      });
+    }
+
     if(cliente && prezzo){
       cliente.addEventListener("keydown", (e) => {
         if(e.key === "Enter"){
@@ -1020,7 +897,7 @@
     }, { passive: true });
   }
 
-  // quando torni nell'app: incassi nascosti
+  // ✅ quando torni nell'app: incassi nascosti
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       hideMoney = true;
