@@ -11,13 +11,18 @@
   <style>
     :root{
       /* 🎀 Beauty theme */
-      --bg:#f5efff;        /* sfondo lilla chiarissimo */
-      --card:#f8f3ff;      /* card lilla chiarissimo */
+      --bg:#f5efff;
+      --card:#f8f3ff;
       --text:#121018;
       --muted:#6b7280;
       --line:rgba(17,17,17,.08);
+
       --accent:#7b4bff;
       --danger:#ff3b30;
+
+      --green:#34c759;
+      --yellow:#ffcc00;
+      --red:#ff3b30;
 
       --shadow: 0 10px 30px rgba(17, 12, 34, .06);
       --shadow2: 0 1px 10px rgba(17, 12, 34, .05);
@@ -143,8 +148,29 @@
     }
 
     /* ✅ giorni passati più grigi */
-    .day.past{
-      opacity: 0.35;
+    .day.past{ opacity: 0.35; }
+
+    /* ✅ Colori in base agli appuntamenti rimanenti */
+    .day.level-green{
+      background: rgba(52,199,89,.12);
+      outline: 2px solid rgba(52,199,89,.18);
+    }
+    .day.level-yellow{
+      background: rgba(255,204,0,.16);
+      outline: 2px solid rgba(255,204,0,.22);
+    }
+    .day.level-red{
+      background: rgba(255,59,48,.14);
+      outline: 2px solid rgba(255,59,48,.22);
+    }
+
+    /* Se il giorno è selezionato, deve vincere la selezione */
+    .day.selected.level-green,
+    .day.selected.level-yellow,
+    .day.selected.level-red{
+      background: rgba(123,75,255,.14);
+      outline: 2px solid rgba(123,75,255,.30);
+      box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
     /* ✅ badge numero appuntamenti (rimanenti) */
@@ -161,6 +187,11 @@
       line-height:1;
       box-shadow: 0 8px 18px rgba(123,75,255,.22);
     }
+
+    /* ✅ Badge che cambia colore come il giorno */
+    .dayCount.level-green{ background: var(--green); }
+    .dayCount.level-yellow{ background: var(--yellow); color:#2b2300; }
+    .dayCount.level-red{ background: var(--red); }
 
     /* ✅ totale € nel giorno (solo giorni passati + solo se incassi visibili) */
     .dayTotalMini{
@@ -232,6 +263,7 @@
       font-weight:900;
       font-size:13px;
       transition: transform .08s ease, opacity .12s ease;
+      background: transparent;
     }
     .smallBtn:active{ transform: scale(.99); }
 
@@ -347,7 +379,7 @@
       <div class="title">Calendario</div>
 
       <div style="display:flex; gap:10px;">
-        <!-- € -->
+        <!-- € per mostrare/nascondere incassi -->
         <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
         <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
       </div>
@@ -499,7 +531,7 @@
     fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
   }
 
-  // ===== conteggi / totali =====
+  // ===== totali =====
   function totalForDay(iso){
     return events.filter(e => e.date === iso)
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
@@ -507,18 +539,13 @@
 
   // ✅ Appuntamenti rimanenti nel giorno (badge)
   function countRemainingForDay(iso){
-    const dayIsPast = isPastDay(iso);
-    if (dayIsPast) return 0;
+    if (isPastDay(iso)) return 0;
 
     const isToday = (dayKey(iso) === todayKey());
     const dayEvents = events.filter(e => e.date === iso);
 
-    if (!isToday) {
-      // giorno futuro: tutti rimanenti
-      return dayEvents.length;
-    }
+    if (!isToday) return dayEvents.length;
 
-    // oggi: rimanenti = quelli con orario > ora attuale
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -528,11 +555,18 @@
       const hh = Number(hhS);
       const mm = Number(mmS);
       if (!Number.isFinite(hh) || !Number.isFinite(mm)) continue;
-
       const evMinutes = hh * 60 + mm;
       if (evMinutes > nowMinutes) remaining++;
     }
     return remaining;
+  }
+
+  // ✅ livello colore in base ai rimanenti
+  function levelFromRemaining(remaining){
+    if (remaining >= 7) return "red";
+    if (remaining >= 4) return "yellow";
+    if (remaining >= 1) return "green";
+    return "";
   }
 
   function weekStartMonday(iso){
@@ -563,7 +597,7 @@
   }
 
   function render(){
-    // stato bottone 👁
+    // stato bottone €
     const moneyBtn = document.getElementById("moneyBtn");
     if (moneyBtn){
       moneyBtn.classList.toggle("moneyOff", hideMoney);
@@ -573,7 +607,7 @@
     document.getElementById("monthName").innerText =
       `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
-    // Totale mese sotto al mese: nascosto finché non premi 👁
+    // Totale mese sotto al mese: nascosto finché non premi €
     const monthTotalEl = document.getElementById("monthTotal");
     if(monthTotalEl){
       if(hideMoney){
@@ -605,23 +639,28 @@
       const isToday = iso === todayISO;
 
       const remaining = countRemainingForDay(iso);
-      const total = totalForDay(iso);
+      const level = levelFromRemaining(remaining);
 
-      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
+      const total = totalForDay(iso);
       const showDayTotal = (!hideMoney && isPast && total > 0);
+
+      const levelClass = level ? ` level-${level}` : "";
 
       const dayEl = document.createElement("div");
       dayEl.className = "day"
         + (isOtherMonth ? " other":"")
         + (isToday ? " today":"")
         + (isSelected ? " selected":"")
-        + (isPast ? " past":"");
+        + (isPast ? " past":"")
+        + levelClass;
 
       dayEl.onclick = () => { selectedDate = iso; render(); };
 
+      const badgeClass = level ? `dayCount level-${level}` : "dayCount";
+
       dayEl.innerHTML = `
         <div class="dayNumber">${d.getDate()}</div>
-        ${remaining > 0 ? `<div class="dayCount">${remaining}</div>` : ""}
+        ${remaining > 0 ? `<div class="${badgeClass}">${remaining}</div>` : ""}
         ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
       `;
 
@@ -828,9 +867,8 @@
     render();
   });
 
-  // ✅ aggiorna automaticamente il badge "rimanenti" (ogni 30 secondi)
+  // ✅ aggiorna automaticamente colori/badge (ogni 30 secondi)
   setInterval(() => {
-    // ricalcolo solo se la pagina è visibile
     if (!document.hidden) render();
   }, 30000);
 
