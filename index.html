@@ -45,15 +45,17 @@
       font-size:22px; font-weight:900;
       letter-spacing:.2px;
     }
+
     .btnIcon{
       width:42px; height:42px;
       border:none; border-radius:14px;
       background:rgba(248,243,255,.9);
       box-shadow: var(--shadow2);
-      font-size:22px;
+      font-size:20px;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
       user-select:none;
+      transition: transform .08s ease, opacity .12s ease;
     }
     .btnIcon:active{ transform: scale(.98); }
     .btnIcon.moneyOff{ opacity:.55; }
@@ -145,7 +147,7 @@
       opacity: 0.35;
     }
 
-    /* ✅ badge numero appuntamenti */
+    /* ✅ badge numero appuntamenti (rimanenti) */
     .dayCount{
       position:absolute;
       right:6px;
@@ -160,7 +162,7 @@
       box-shadow: 0 8px 18px rgba(123,75,255,.22);
     }
 
-    /* ✅ totale € nel giorno (solo giorni passati + solo se € visibile) */
+    /* ✅ totale € nel giorno (solo giorni passati + solo se incassi visibili) */
     .dayTotalMini{
       position:absolute;
       left:6px;
@@ -221,17 +223,29 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .eventActions{ display:flex; gap:8px; }
+
+    /* ✅ Bottoni beauty (Modifica/Elimina) */
     .smallBtn{
       border:none; cursor:pointer;
-      background: #14121a;
-      color:#fff;
       padding: 8px 10px;
       border-radius: 12px;
       font-weight:900;
       font-size:13px;
+      transition: transform .08s ease, opacity .12s ease;
     }
-    .smallBtn.danger{ background: var(--danger); }
-    .smallBtn.gray{ background: rgba(17,17,17,.10); color:#14121a; }
+    .smallBtn:active{ transform: scale(.99); }
+
+    .smallBtn.gray{
+      background: rgba(123,75,255,.12);
+      color: #3f2db3;
+      border: 1px solid rgba(123,75,255,.18);
+    }
+
+    .smallBtn.danger{
+      background: rgba(255,59,48,.12);
+      color: #c81e1e;
+      border: 1px solid rgba(255,59,48,.20);
+    }
 
     /* Modal */
     .modalBack{
@@ -257,9 +271,17 @@
       margin-bottom: 10px;
     }
     .modalTitle{ font-size:16px; font-weight:900; }
+
+    /* ✅ Chiudi beauty */
     .closeBtn{
-      border:none; background: rgba(17,17,17,.10); border-radius: 12px;
-      padding: 8px 10px; cursor:pointer; font-weight:900; color:#14121a;
+      border:none;
+      background: rgba(123,75,255,.10);
+      border: 1px solid rgba(123,75,255,.16);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight:900;
+      color:#3f2db3;
     }
 
     .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; font-weight:800; }
@@ -286,20 +308,20 @@
       box-shadow: 0 14px 30px rgba(123,75,255,.25);
     }
 
-    /* Floating + button */
+    /* ✅ Floating + button più bello */
     .fab{
       position:fixed;
       right: 16px;
       bottom: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 18px;
-      border:none;
-      background: var(--accent);
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.35);
+      background: linear-gradient(180deg, rgba(123,75,255,1) 0%, rgba(98,55,255,1) 100%);
       color:#fff;
       font-size: 30px;
       font-weight:900;
-      box-shadow: 0 16px 36px rgba(123,75,255,.30);
+      box-shadow: 0 18px 40px rgba(123,75,255,.32);
       cursor:pointer;
       z-index:50;
     }
@@ -325,7 +347,8 @@
       <div class="title">Calendario</div>
 
       <div style="display:flex; gap:10px;">
-        <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
+        <!-- 👁 al posto di € -->
+        <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">👁</button>
         <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
       </div>
     </div>
@@ -454,16 +477,16 @@
     if (d < t) return true;
 
     if (d.getTime() === t.getTime()) {
-      const parts = String(hhmm || "").split(":");
-      const hh = Number(parts[0]);
-      const mm = Number(parts[1]);
+      const [hhS, mmS] = String(hhmm || "").split(":");
+      const hh = Number(hhS);
+      const mm = Number(mmS);
       if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
 
       const chosen = new Date();
       chosen.setSeconds(0,0);
       chosen.setHours(hh, mm, 0, 0);
 
-      return chosen <= now;
+      return chosen <= now; // oggi ma ora passata (o uguale)
     }
     return false;
   }
@@ -476,12 +499,40 @@
     fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
   }
 
-  function countForDay(iso){
-    return events.filter(e => e.date === iso).length;
-  }
+  // ===== conteggi / totali =====
   function totalForDay(iso){
     return events.filter(e => e.date === iso)
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
+  }
+
+  // ✅ Appuntamenti rimanenti nel giorno (badge)
+  function countRemainingForDay(iso){
+    const dayIsPast = isPastDay(iso);
+    if (dayIsPast) return 0;
+
+    const isToday = (dayKey(iso) === todayKey());
+    const dayEvents = events.filter(e => e.date === iso);
+
+    if (!isToday) {
+      // giorno futuro: tutti rimanenti
+      return dayEvents.length;
+    }
+
+    // oggi: rimanenti = quelli con orario > ora attuale
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    let remaining = 0;
+    for (const ev of dayEvents) {
+      const [hhS, mmS] = String(ev.time || "").split(":");
+      const hh = Number(hhS);
+      const mm = Number(mmS);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm)) continue;
+
+      const evMinutes = hh * 60 + mm;
+      if (evMinutes > nowMinutes) remaining++;
+    }
+    return remaining;
   }
 
   function weekStartMonday(iso){
@@ -512,6 +563,7 @@
   }
 
   function render(){
+    // stato bottone 👁
     const moneyBtn = document.getElementById("moneyBtn");
     if (moneyBtn){
       moneyBtn.classList.toggle("moneyOff", hideMoney);
@@ -521,6 +573,7 @@
     document.getElementById("monthName").innerText =
       `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
+    // Totale mese sotto al mese: nascosto finché non premi 👁
     const monthTotalEl = document.getElementById("monthTotal");
     if(monthTotalEl){
       if(hideMoney){
@@ -551,8 +604,10 @@
       const isPast = isPastDay(iso);
       const isToday = iso === todayISO;
 
-      const count = countForDay(iso);
+      const remaining = countRemainingForDay(iso);
       const total = totalForDay(iso);
+
+      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
       const showDayTotal = (!hideMoney && isPast && total > 0);
 
       const dayEl = document.createElement("div");
@@ -566,7 +621,7 @@
 
       dayEl.innerHTML = `
         <div class="dayNumber">${d.getDate()}</div>
-        ${count > 0 ? `<div class="dayCount">${count}</div>` : ""}
+        ${remaining > 0 ? `<div class="dayCount">${remaining}</div>` : ""}
         ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
       `;
 
@@ -730,6 +785,7 @@
       .replaceAll("'","&#039;");
   }
 
+  // Swipe mese
   function enableMonthSwipe(){
     const el = document.getElementById("calendarCard");
     if(!el) return;
@@ -760,17 +816,23 @@
     }, { passive: true });
   }
 
+  // quando torni nell'app: incassi nascosti
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       hideMoney = true;
       render();
     }
   });
-
   window.addEventListener("pageshow", () => {
     hideMoney = true;
     render();
   });
+
+  // ✅ aggiorna automaticamente il badge "rimanenti" (ogni 30 secondi)
+  setInterval(() => {
+    // ricalcolo solo se la pagina è visibile
+    if (!document.hidden) render();
+  }, 30000);
 
   enableMonthSwipe();
   render();
