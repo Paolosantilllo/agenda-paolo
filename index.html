@@ -310,7 +310,8 @@
   </div>
 
   <div class="container">
-    <div class="card">
+    <!-- ✅ id per abilitare lo swipe -->
+    <div class="card" id="calendarCard">
       <div class="weekdays">
         <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
       </div>
@@ -320,7 +321,8 @@
     <div class="section">
       <div class="sectionHeader">
         <h2 id="selectedLabel">Appuntamenti</h2>
-        <div class="muted" id="selectedTotal">Totale: € 0.00</div>
+        <!-- ✅ totale giorno + totale settimana -->
+        <div class="muted" id="selectedTotal">Giorno: € 0.00 • Settimana: € 0.00</div>
       </div>
 
       <div class="eventList" id="eventList"></div>
@@ -328,7 +330,6 @@
     </div>
   </div>
 
-  <!-- ✅ + con id per disabilitarlo -->
   <button class="fab" id="fabAdd" onclick="openAddModal()" title="Aggiungi">+</button>
 
   <!-- MODAL -->
@@ -360,7 +361,6 @@
   // ===== Storage =====
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
-  // event = { id, date:'YYYY-MM-DD', time:'HH:MM', cliente, prezzo }
 
   // ===== Privacy incassi =====
   let hideMoney = JSON.parse(localStorage.getItem("hideMoney") || "false");
@@ -375,7 +375,7 @@
 
   // ===== State calendario =====
   const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  let viewDate = new Date(); // mese mostrato
+  let viewDate = new Date();
   let selectedDate = isoToday();
 
   // ===== Utils =====
@@ -390,16 +390,22 @@
     const [y,m,d] = iso.split("-").map(Number);
     return new Date(y, m-1, d);
   }
+  function toISODateOnly(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
   function euro(n){ return (Number(n||0)).toFixed(2); }
   function save(){ localStorage.setItem(KEY, JSON.stringify(events)); }
   function uid(){
     return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
   }
 
-  // Lunedì come primo giorno (iOS in IT)
+  // Lunedì come primo giorno
   function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
 
-  // ===== Date helpers (solo giorno) =====
+  // ===== Date helpers =====
   function dayKey(iso){
     const d = parseISO(iso);
     d.setHours(0,0,0,0);
@@ -424,7 +430,7 @@
     const t = new Date();
     t.setHours(0,0,0,0);
 
-    if (d < t) return true; // giorno passato
+    if (d < t) return true;
 
     if (d.getTime() === t.getTime()) {
       const parts = String(hhmm || "").split(":");
@@ -436,10 +442,10 @@
       chosen.setSeconds(0,0);
       chosen.setHours(hh, mm, 0, 0);
 
-      return chosen <= now; // oggi ma ora passata (o uguale)
+      return chosen <= now;
     }
 
-    return false; // futuro
+    return false;
   }
 
   function updateFabState(){
@@ -460,9 +466,27 @@
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
+  // ===== Totale settimana (lunedì-domenica) =====
+  function weekStartMonday(iso){
+    const d = parseISO(iso);
+    const day = (d.getDay() + 6) % 7; // lun=0..dom=6
+    d.setDate(d.getDate() - day);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function totalForWeek(iso){
+    const start = weekStartMonday(iso);
+    let sum = 0;
+    for(let i=0;i<7;i++){
+      const d = new Date(start);
+      d.setDate(start.getDate()+i);
+      sum += totalForDay(toISODateOnly(d));
+    }
+    return sum;
+  }
+
   // ===== Calendar render =====
   function render(){
-    // stato bottone €
     const moneyBtn = document.getElementById("moneyBtn");
     if (moneyBtn){
       moneyBtn.classList.toggle("moneyOff", hideMoney);
@@ -529,8 +553,10 @@
       .filter(e => e.date === selectedDate)
       .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
 
-    const total = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
-    totalEl.innerText = `Totale: ${moneyText(total)}`;
+    const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
+    const totalWeek = totalForWeek(selectedDate);
+
+    totalEl.innerText = `Giorno: ${moneyText(totalDay)} • Settimana: ${moneyText(totalWeek)}`;
 
     list.innerHTML = "";
     if(dayEvents.length === 0){
@@ -614,7 +640,6 @@
       return;
     }
 
-    // ✅ blocca anche oggi con orario già passato
     if (isPastDateTime(date, time)) {
       alert("Non puoi inserire appuntamenti in una data/ora passata.");
       return;
@@ -671,6 +696,40 @@
       .replaceAll("'","&#039;");
   }
 
+  // ✅ Swipe mese (iPhone-like)
+  function enableMonthSwipe(){
+    const el = document.getElementById("calendarCard");
+    if(!el) return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    el.addEventListener("touchstart", (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    el.addEventListener("touchend", (e) => {
+      if(!tracking) return;
+      tracking = false;
+
+      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if(!t) return;
+
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+
+      if (dx < 0) nextMonth();
+      else prevMonth();
+    }, { passive: true });
+  }
+
+  enableMonthSwipe();
   render();
 </script>
 
