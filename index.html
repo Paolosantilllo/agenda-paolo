@@ -1,788 +1,492 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agenda Paolo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Paolo</title>
 
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 
-  <style>
-    :root{
-      --bg:#f2f2f7;
-      --card:#ffffff;
-      --text:#111;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --accent:#7b4bff;
-      --danger:#ff3b30;
-    }
+<style>
+:root{
+--bg:#f2f2f7;
+--card:#ffffff;
+--text:#111;
+--muted:#6b7280;
+--line:#e5e7eb;
+--accent:#7b4bff;
+--danger:#ff3b30;
+}
 
-    body{
-      margin:0;
-      font-family:-apple-system, system-ui, Arial;
-      background:var(--bg);
-      color:var(--text);
-    }
+body{
+margin:0;
+font-family:-apple-system,system-ui,Arial;
+background:var(--bg);
+color:var(--text);
+}
 
-    /* Top bar stile iOS */
-    .topbar{
-      position:sticky; top:0; z-index:10;
-      background:rgba(242,242,247,.85);
-      backdrop-filter: blur(12px);
-      border-bottom:1px solid var(--line);
-      padding:14px 14px 10px;
-    }
-    .topbarRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .title{
-      font-size:22px; font-weight:800;
-    }
-    .btnIcon{
-      width:42px; height:42px;
-      border:none; border-radius:14px;
-      background:var(--card);
-      box-shadow: 0 1px 8px rgba(0,0,0,.06);
-      font-size:22px;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      user-select:none;
-    }
-    .btnIcon:active{ transform: scale(.98); }
-    .btnIcon.moneyOff{ opacity:.55; }
+/* TOP BAR */
 
-    .monthRow{
-      display:flex; align-items:center; justify-content:center; gap:12px;
-      margin-top:10px;
-    }
-    .monthName{
-      font-size:18px; font-weight:800;
-    }
-    .navBtn{
-      border:none; background:transparent; cursor:pointer;
-      font-size:20px; padding:8px 10px; border-radius:12px;
-    }
-    .navBtn:hover{ background: rgba(0,0,0,.05); }
+.topbar{
+position:sticky;
+top:0;
+background:rgba(242,242,247,.9);
+backdrop-filter:blur(10px);
+border-bottom:1px solid var(--line);
+padding:14px;
+z-index:10;
+}
 
-    /* ✅ Totale mese sotto al mese */
-    .monthTotal{
-      text-align:center;
-      margin-top:6px;
-      font-size:13px;
-      font-weight:800;
-      color: var(--accent);
-    }
+.topbarRow{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 
-    /* Calendar grid */
-    .container{
-      padding: 12px 14px 90px;
-      max-width: 880px;
-      margin: 0 auto;
-    }
-    .card{
-      background:var(--card);
-      border-radius:18px;
-      box-shadow: 0 1px 10px rgba(0,0,0,.06);
-      overflow:hidden;
-      border: 1px solid rgba(0,0,0,.04);
-    }
+.title{
+font-size:22px;
+font-weight:800;
+}
 
-    .weekdays{
-      display:grid; grid-template-columns: repeat(7, 1fr);
-      padding: 10px 10px 6px;
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
-      border-bottom:1px solid var(--line);
-    }
-    .grid{
-      display:grid; grid-template-columns: repeat(7, 1fr);
-      gap: 0;
-      padding: 6px;
-    }
+.btnIcon{
+width:40px;
+height:40px;
+border:none;
+border-radius:12px;
+background:white;
+font-size:20px;
+cursor:pointer;
+}
 
-    .day{
-      height: 54px;
-      border-radius: 14px;
-      margin: 4px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:flex-start;
-      padding: 8px 8px;
-      cursor:pointer;
-      position:relative;
-      user-select:none;
-    }
-    .day:hover{ background: rgba(0,0,0,.04); }
-    .day.other{ color: #b8b8c4; }
-    .dayNumber{ font-weight:700; font-size:14px; }
+/* MESE */
 
-    .day.selected{
-      background: rgba(123,75,255,.12);
-      outline: 2px solid rgba(123,75,255,.25);
-    }
+.monthRow{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:12px;
+margin-top:6px;
+}
 
-    /* ✅ giorni passati più grigi */
-    .day.past{
-      opacity: 0.35;
-    }
+.monthName{
+font-weight:800;
+font-size:18px;
+}
 
-    /* ✅ badge numero appuntamenti */
-    .dayCount{
-      position:absolute;
-      right:6px;
-      top:6px;
-      font-size:11px;
-      font-weight:900;
-      color:white;
-      background: var(--accent);
-      padding:3px 6px;
-      border-radius:999px;
-      line-height:1;
-    }
+.navBtn{
+border:none;
+background:none;
+font-size:20px;
+cursor:pointer;
+}
 
-    /* ✅ totale € nel giorno (solo giorni passati + solo se € visibile) */
-    .dayTotalMini{
-      position:absolute;
-      left:6px;
-      bottom:6px;
-      font-size:11px;
-      font-weight:800;
-      color: var(--accent);
-    }
+.monthTotal{
+text-align:center;
+margin-top:6px;
+font-size:13px;
+font-weight:800;
+color:var(--accent);
+}
 
-    /* Events list */
-    .section{ margin-top: 14px; }
-    .sectionHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin: 0 2px 8px;
-    }
-    .sectionHeader h2{
-      margin:0;
-      font-size:16px;
-      font-weight:800;
-    }
-    .muted{ color:var(--muted); font-size:13px; }
+/* CALENDARIO */
 
-    .eventList{
-      background:var(--card);
-      border-radius:18px;
-      box-shadow: 0 1px 10px rgba(0,0,0,.06);
-      border: 1px solid rgba(0,0,0,.04);
-      overflow:hidden;
-    }
-    .eventRow{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 12px 12px;
-      border-bottom:1px solid var(--line);
-      gap:12px;
-    }
-    .eventRow:last-child{ border-bottom:none; }
-    .eventLeft{
-      display:flex; align-items:flex-start; gap:10px; min-width:0;
-    }
-    .pillTime{
-      background: rgba(123,75,255,.12);
-      color: #3f2db3;
-      font-weight:800;
-      font-size:12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      white-space:nowrap;
-    }
-    .eventText{ min-width:0; }
-    .eventTitle{
-      font-weight:800;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .eventSub{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:2px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .eventActions{ display:flex; gap:8px; }
-    .smallBtn{
-      border:none; cursor:pointer;
-      background: #111;
-      color:#fff;
-      padding: 8px 10px;
-      border-radius: 12px;
-      font-weight:700;
-      font-size:13px;
-    }
-    .smallBtn.danger{ background: var(--danger); }
-    .smallBtn.gray{ background: #e5e7eb; color:#111; }
+.container{
+padding:12px;
+}
 
-    /* Modal */
-    .modalBack{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.35);
-      display:none;
-      align-items:flex-end;
-      z-index:100;
-    }
-    .modal{
-      width:100%;
-      background: var(--card);
-      border-top-left-radius: 22px;
-      border-top-right-radius: 22px;
-      padding: 14px 14px 18px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,.2);
-      max-height: 85vh;
-      overflow:auto;
-    }
-    .modalHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom: 10px;
-    }
-    .modalTitle{ font-size:16px; font-weight:900; }
-    .closeBtn{
-      border:none; background:#e5e7eb; border-radius: 12px;
-      padding: 8px 10px; cursor:pointer; font-weight:800;
-    }
+.card{
+background:var(--card);
+border-radius:18px;
+box-shadow:0 1px 10px rgba(0,0,0,.06);
+overflow:hidden;
+}
 
-    .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; }
-    .input{
-      width:100%;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      font-size: 16px;
-      box-sizing:border-box;
-    }
-    .primary{
-      width:100%;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border:none;
-      background: var(--accent);
-      color:white;
-      font-weight:900;
-      font-size:16px;
-      cursor:pointer;
-    }
+.weekdays{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+padding:10px;
+font-size:12px;
+color:var(--muted);
+text-align:center;
+border-bottom:1px solid var(--line);
+}
 
-    /* Floating + button */
-    .fab{
-      position:fixed;
-      right: 16px;
-      bottom: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 18px;
-      border:none;
-      background: var(--accent);
-      color:#fff;
-      font-size: 30px;
-      font-weight:900;
-      box-shadow: 0 10px 30px rgba(123,75,255,.35);
-      cursor:pointer;
-      z-index:50;
-    }
-    .fab:active{ transform: scale(.98); }
+.grid{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+padding:6px;
+}
 
-    /* ✅ stato disabilitato del + */
-    .fab.disabled{
-      opacity: .45;
-      box-shadow: none;
-    }
+.day{
+height:54px;
+border-radius:12px;
+margin:4px;
+padding:6px;
+position:relative;
+cursor:pointer;
+}
 
-    @media (min-width: 720px){
-      .modalBack{ align-items:center; justify-content:center; }
-      .modal{ width: 520px; border-radius: 22px; }
-    }
-  </style>
+.day.selected{
+background:rgba(123,75,255,.15);
+}
+
+.dayNumber{
+font-weight:700;
+font-size:14px;
+}
+
+.dayCount{
+position:absolute;
+right:6px;
+top:6px;
+font-size:11px;
+background:var(--accent);
+color:white;
+border-radius:999px;
+padding:2px 6px;
+font-weight:800;
+}
+
+/* LISTA EVENTI */
+
+.section{
+margin-top:14px;
+}
+
+.sectionHeader{
+display:flex;
+justify-content:space-between;
+}
+
+.eventList{
+background:white;
+border-radius:18px;
+overflow:hidden;
+box-shadow:0 1px 10px rgba(0,0,0,.06);
+}
+
+.eventRow{
+display:flex;
+justify-content:space-between;
+padding:12px;
+border-bottom:1px solid var(--line);
+}
+
+.pillTime{
+background:rgba(123,75,255,.15);
+padding:4px 8px;
+border-radius:999px;
+font-size:12px;
+font-weight:800;
+}
+
+.smallBtn{
+border:none;
+padding:6px 8px;
+border-radius:10px;
+cursor:pointer;
+font-weight:700;
+}
+
+.smallBtn.gray{background:#eee}
+.smallBtn.danger{background:#ffdada}
+
+/* MODAL */
+
+.modalBack{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.35);
+display:none;
+align-items:flex-end;
+}
+
+.modal{
+width:100%;
+background:white;
+border-radius:20px 20px 0 0;
+padding:14px;
+}
+
+.fieldLabel{
+font-size:12px;
+color:var(--muted);
+margin-top:10px;
+}
+
+.input{
+width:100%;
+padding:10px;
+border-radius:12px;
+border:1px solid #ddd;
+font-size:16px;
+}
+
+.primary{
+width:100%;
+margin-top:12px;
+padding:12px;
+border:none;
+border-radius:12px;
+background:var(--accent);
+color:white;
+font-weight:800;
+cursor:pointer;
+}
+
+/* FAB */
+
+.fab{
+position:fixed;
+right:16px;
+bottom:20px;
+width:56px;
+height:56px;
+border-radius:18px;
+border:none;
+background:var(--accent);
+color:white;
+font-size:30px;
+cursor:pointer;
+}
+
+</style>
 </head>
 
 <body>
 
-  <div class="topbar">
-    <div class="topbarRow">
-      <div class="title">Calendario</div>
+<div class="topbar">
 
-      <div style="display:flex; gap:10px;">
-        <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
-        <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
-      </div>
-    </div>
+<div class="topbarRow">
+<div class="title">Calendario</div>
 
-    <div class="monthRow">
-      <button class="navBtn" onclick="prevMonth()">‹</button>
-      <div class="monthName" id="monthName">—</div>
-      <button class="navBtn" onclick="nextMonth()">›</button>
-    </div>
+<div>
+<button class="btnIcon" onclick="toggleMoney()">€</button>
+<button class="btnIcon" onclick="goToday()">•</button>
+</div>
+</div>
 
-    <!-- ✅ Totale mese (nascosto di default, appare solo quando premi €) -->
-    <div class="monthTotal" id="monthTotal" style="display:none;">Totale mese: € 0.00</div>
-  </div>
+<div class="monthRow">
+<button class="navBtn" onclick="prevMonth()">‹</button>
+<div class="monthName" id="monthName"></div>
+<button class="navBtn" onclick="nextMonth()">›</button>
+</div>
 
-  <div class="container">
-    <!-- ✅ id per swipe -->
-    <div class="card" id="calendarCard">
-      <div class="weekdays">
-        <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
-      </div>
-      <div class="grid" id="calendarGrid"></div>
-    </div>
+<div class="monthTotal" id="monthTotal" style="display:none"></div>
 
-    <div class="section">
-      <div class="sectionHeader">
-        <h2 id="selectedLabel">Appuntamenti</h2>
-        <div class="muted" id="selectedTotal">Giorno: — • Settimana: —</div>
-      </div>
+</div>
 
-      <div class="eventList" id="eventList"></div>
-      <div class="muted" style="margin-top:10px" id="emptyHint"></div>
-    </div>
-  </div>
+<div class="container">
 
-  <button class="fab" id="fabAdd" onclick="openAddModal()" title="Aggiungi">+</button>
+<div class="card">
+<div class="weekdays">
+<div>Lun</div><div>Mar</div><div>Mer</div>
+<div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+</div>
 
-  <!-- MODAL -->
-  <div class="modalBack" id="modalBack" onclick="closeModalIfBackdrop(event)">
-    <div class="modal">
-      <div class="modalHeader">
-        <div class="modalTitle" id="modalTitle">Nuovo appuntamento</div>
-        <button class="closeBtn" onclick="closeModal()">Chiudi</button>
-      </div>
+<div class="grid" id="calendarGrid"></div>
+</div>
 
-      <div class="fieldLabel">Data</div>
-      <input class="input" type="date" id="mData">
+<div class="section">
 
-      <div class="fieldLabel">Ora</div>
-      <input class="input" type="time" id="mOra">
+<div class="sectionHeader">
+<h2 id="selectedLabel"></h2>
+<div id="selectedTotal"></div>
+</div>
 
-      <div class="fieldLabel">Cliente</div>
-      <input class="input" type="text" id="mCliente" placeholder="Nome cliente">
+<div class="eventList" id="eventList"></div>
 
-      <div class="fieldLabel">Prezzo (€)</div>
-      <input class="input" type="number" step="0.01" min="0" id="mPrezzo" placeholder="Es. 35">
+</div>
 
-      <button class="primary" id="saveBtn" onclick="saveModal()">Salva</button>
-      <div class="muted" style="margin-top:10px;">I dati restano salvati sul tuo dispositivo (localStorage).</div>
-    </div>
-  </div>
+</div>
+
+<button class="fab" onclick="openAddModal()">+</button>
+
+<div class="modalBack" id="modalBack">
+<div class="modal">
+
+<div class="fieldLabel">Data</div>
+<input class="input" type="date" id="mData">
+
+<div class="fieldLabel">Ora</div>
+<input class="input" type="time" id="mOra">
+
+<div class="fieldLabel">Cliente</div>
+<input class="input" id="mCliente">
+
+<div class="fieldLabel">Prezzo</div>
+<input class="input" type="number" id="mPrezzo">
+
+<button class="primary" onclick="saveModal()">Salva</button>
+
+</div>
+</div>
 
 <script>
-  // ===== Storage =====
-  const KEY = "agendaPaoloCalendarV1";
-  let events = JSON.parse(localStorage.getItem(KEY) || "[]");
-  // event = { id, date:'YYYY-MM-DD', time:'HH:MM', cliente, prezzo }
-
-  // ===== Privacy incassi =====
-  // ✅ sempre nascosto quando apri/riapri l'app
-  let hideMoney = true;
-
-  function toggleMoney(){
-    hideMoney = !hideMoney;
-    render();
-  }
-  function moneyText(value){
-    return hideMoney ? "—" : `€ ${euro(value)}`;
-  }
-
-  // ===== State calendario =====
-  const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  let viewDate = new Date(); // mese mostrato
-  let selectedDate = isoToday();
-
-  // ===== Utils =====
-  function isoToday(){ return toISO(new Date()); }
-  function toISO(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${day}`;
-  }
-  function parseISO(iso){
-    const [y,m,d] = iso.split("-").map(Number);
-    return new Date(y, m-1, d);
-  }
-  function toISODateOnly(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${day}`;
-  }
-  function euro(n){ return (Number(n||0)).toFixed(2); }
-  function save(){ localStorage.setItem(KEY, JSON.stringify(events)); }
-  function uid(){
-    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
-  }
-
-  // Lunedì come primo giorno (iOS in IT)
-  function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
-
-  // ===== Date helpers (solo giorno) =====
-  function dayKey(iso){
-    const d = parseISO(iso);
-    d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-  function todayKey(){
-    const t = new Date();
-    t.setHours(0,0,0,0);
-    return t.getTime();
-  }
-  function isPastDay(iso){
-    return dayKey(iso) < todayKey();
-  }
-
-  // ✅ blocca data/ora passata (oggi incluso)
-  function isPastDateTime(isoDate, hhmm){
-    const now = new Date();
-
-    const d = parseISO(isoDate);
-    d.setHours(0,0,0,0);
-
-    const t = new Date();
-    t.setHours(0,0,0,0);
-
-    if (d < t) return true; // giorno passato
-
-    if (d.getTime() === t.getTime()) {
-      const parts = String(hhmm || "").split(":");
-      const hh = Number(parts[0]);
-      const mm = Number(parts[1]);
-      if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
-
-      const chosen = new Date();
-      chosen.setSeconds(0,0);
-      chosen.setHours(hh, mm, 0, 0);
-
-      return chosen <= now; // oggi ma ora passata (o uguale)
-    }
-
-    return false; // futuro
-  }
-
-  function updateFabState(){
-    const fab = document.getElementById("fabAdd");
-    if(!fab) return;
-
-    const disabled = isPastDay(selectedDate);
-    fab.classList.toggle("disabled", disabled);
-    fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
-  }
-
-  function countForDay(iso){
-    return events.filter(e => e.date === iso).length;
-  }
-  function totalForDay(iso){
-    return events
-      .filter(e => e.date === iso)
-      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
-  }
-
-  // ===== Totale settimana (lunedì-domenica) =====
-  function weekStartMonday(iso){
-    const d = parseISO(iso);
-    const day = (d.getDay() + 6) % 7; // lun=0..dom=6
-    d.setDate(d.getDate() - day);
-    d.setHours(0,0,0,0);
-    return d;
-  }
-  function totalForWeek(iso){
-    const start = weekStartMonday(iso);
-    let sum = 0;
-    for(let i=0;i<7;i++){
-      const d = new Date(start);
-      d.setDate(start.getDate()+i);
-      sum += totalForDay(toISODateOnly(d));
-    }
-    return sum;
-  }
-
-  // ===== Totale mese della vista (viewDate) =====
-  function totalForMonthView(){
-    const y = viewDate.getFullYear();
-    const m = viewDate.getMonth();
-    return events
-      .filter(e => {
-        const d = parseISO(e.date);
-        return d.getFullYear() === y && d.getMonth() === m;
-      })
-      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
-  }
-
-  // ===== Calendar render =====
-  function render(){
-    // stato bottone €
-    const moneyBtn = document.getElementById("moneyBtn");
-    if (moneyBtn){
-      moneyBtn.classList.toggle("moneyOff", hideMoney);
-      moneyBtn.title = hideMoney ? "Incassi nascosti" : "Incassi visibili";
-    }
-
-    document.getElementById("monthName").innerText = `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
-
-    // ✅ Totale mese sotto al mese: sempre nascosto finché non premi €
-    const monthTotalEl = document.getElementById("monthTotal");
-    if(monthTotalEl){
-      if(hideMoney){
-        monthTotalEl.style.display = "none";
-      } else {
-        monthTotalEl.innerText = `Totale mese: € ${euro(totalForMonthView())}`;
-        monthTotalEl.style.display = "block";
-      }
-    }
-
-    const grid = document.getElementById("calendarGrid");
-    grid.innerHTML = "";
-
-    const first = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
-    const firstDay = mondayIndex(first.getDay());
-    const start = new Date(first);
-    start.setDate(1 - firstDay);
-
-    // 42 celle
-    for(let i=0;i<42;i++){
-      const d = new Date(start);
-      d.setDate(start.getDate()+i);
-
-      const iso = toISO(d);
-      const isOtherMonth = d.getMonth() !== viewDate.getMonth();
-      const isSelected = iso === selectedDate;
-      const isPast = isPastDay(iso);
-
-      const count = countForDay(iso);
-      const total = totalForDay(iso);
-
-      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
-      const showDayTotal = (!hideMoney && isPast && total > 0);
-
-      const dayEl = document.createElement("div");
-      dayEl.className = "day"
-        + (isOtherMonth ? " other":"")
-        + (isSelected ? " selected":"")
-        + (isPast ? " past":"");
-
-      dayEl.onclick = () => { selectedDate = iso; render(); };
-
-      dayEl.innerHTML = `
-        <div class="dayNumber">${d.getDate()}</div>
-        ${count > 0 ? `<div class="dayCount">${count}</div>` : ""}
-        ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
-      `;
-
-      grid.appendChild(dayEl);
-    }
-
-    updateFabState();
-    renderEventsForSelectedDay();
-  }
-
-  // ===== Events list =====
-  function renderEventsForSelectedDay(){
-    const list = document.getElementById("eventList");
-    const empty = document.getElementById("emptyHint");
-    const label = document.getElementById("selectedLabel");
-    const totalEl = document.getElementById("selectedTotal");
-
-    const d = parseISO(selectedDate);
-    label.innerText = `Appuntamenti • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
-
-    const dayEvents = events
-      .filter(e => e.date === selectedDate)
-      .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
-
-    const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
-    const totalWeek = totalForWeek(selectedDate);
-
-    totalEl.innerText = `Giorno: ${moneyText(totalDay)} • Settimana: ${moneyText(totalWeek)}`;
-
-    list.innerHTML = "";
-    if(dayEvents.length === 0){
-      empty.innerText = "Nessun appuntamento per questo giorno. Premi + per aggiungere.";
-      return;
-    }
-    empty.innerText = "";
-
-    dayEvents.forEach(e => {
-      const row = document.createElement("div");
-      row.className = "eventRow";
-      row.innerHTML = `
-        <div class="eventLeft">
-          <div class="pillTime">${e.time || "--:--"}</div>
-          <div class="eventText">
-            <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
-            <div class="eventSub">${hideMoney ? "" : ("€ " + euro(e.prezzo))}</div>
-          </div>
-        </div>
-        <div class="eventActions">
-          <button class="smallBtn gray" onclick="openEditModal('${e.id}')">Modifica</button>
-          <button class="smallBtn danger" onclick="removeEvent('${e.id}')">Elimina</button>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-  }
-
-  function removeEvent(id){
-    if(!confirm("Vuoi eliminare questo appuntamento?")) return;
-    events = events.filter(e => e.id !== id);
-    save();
-    render();
-  }
-
-  // ===== Modal add/edit =====
-  let editingId = null;
-
-  function openAddModal(){
-    if (isPastDay(selectedDate)) {
-      alert("Non puoi aggiungere appuntamenti in una data passata.");
-      return;
-    }
-
-    editingId = null;
-    document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
-    document.getElementById("saveBtn").innerText = "Salva";
-
-    document.getElementById("mData").value = selectedDate;
-    document.getElementById("mOra").value = "";
-    document.getElementById("mCliente").value = "";
-    document.getElementById("mPrezzo").value = "";
-
-    openModal();
-  }
-
-  function openEditModal(id){
-    const e = events.find(x => x.id === id);
-    if(!e) return;
-
-    editingId = id;
-    document.getElementById("modalTitle").innerText = "Modifica appuntamento";
-    document.getElementById("saveBtn").innerText = "Salva modifiche";
-
-    document.getElementById("mData").value = e.date;
-    document.getElementById("mOra").value = e.time || "";
-    document.getElementById("mCliente").value = e.cliente || "";
-    document.getElementById("mPrezzo").value = e.prezzo ?? "";
-
-    openModal();
-  }
-
-  function saveModal(){
-    const date = document.getElementById("mData").value;
-    const time = document.getElementById("mOra").value;
-    const cliente = document.getElementById("mCliente").value.trim();
-    const prezzo = Number(document.getElementById("mPrezzo").value);
-
-    if(!date || !time || !cliente || !Number.isFinite(prezzo) || prezzo < 0){
-      alert("Compila: data, ora, cliente e prezzo.");
-      return;
-    }
-
-    // ✅ blocca anche oggi con orario già passato
-    if (isPastDateTime(date, time)) {
-      alert("Non puoi inserire appuntamenti in una data/ora passata.");
-      return;
-    }
-
-    if(editingId){
-      const i = events.findIndex(e => e.id === editingId);
-      if(i !== -1){
-        events[i] = { ...events[i], date, time, cliente, prezzo };
-      }
-    } else {
-      events.push({ id: uid(), date, time, cliente, prezzo });
-    }
-
-    save();
-    selectedDate = date;
-    viewDate = parseISO(date);
-    closeModal();
-    render();
-  }
-
-  function openModal(){
-    document.getElementById("modalBack").style.display = "flex";
-  }
-  function closeModal(){
-    document.getElementById("modalBack").style.display = "none";
-  }
-  function closeModalIfBackdrop(evt){
-    if(evt.target.id === "modalBack") closeModal();
-  }
-
-  // ===== Month navigation =====
-  function prevMonth(){
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
-    render();
-  }
-  function nextMonth(){
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
-    render();
-  }
-  function goToday(){
-    const t = new Date();
-    viewDate = new Date(t.getFullYear(), t.getMonth(), 1);
-    selectedDate = toISO(t);
-    render();
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  // ✅ Swipe mese (iPhone-like)
-  function enableMonthSwipe(){
-    const el = document.getElementById("calendarCard");
-    if(!el) return;
-
-    let startX = 0;
-    let startY = 0;
-    let tracking = false;
-
-    el.addEventListener("touchstart", (e) => {
-      if (!e.touches || e.touches.length !== 1) return;
-      tracking = true;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    }, { passive: true });
-
-    el.addEventListener("touchend", (e) => {
-      if(!tracking) return;
-      tracking = false;
-
-      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
-      if(!t) return;
-
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
-
-      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
-
-      if (dx < 0) nextMonth();
-      else prevMonth();
-    }, { passive: true });
-  }
-
-  // ✅ quando torni nell'app (background -> foreground) nascondi sempre €
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      hideMoney = true;
-      render();
-    }
-  });
-
-  // ✅ Safari: quando riapre da cache
-  window.addEventListener("pageshow", () => {
-    hideMoney = true;
-    render();
-  });
-
-  enableMonthSwipe();
-  render();
+
+const KEY="agendaPaoloCalendarV1"
+let events=JSON.parse(localStorage.getItem(KEY)||[])
+
+let hideMoney=true
+let viewDate=new Date()
+let selectedDate=toISO(new Date())
+
+function toISO(d){
+return d.toISOString().slice(0,10)
+}
+
+function save(){
+localStorage.setItem(KEY,JSON.stringify(events))
+}
+
+function toggleMoney(){
+hideMoney=!hideMoney
+render()
+}
+
+function goToday(){
+viewDate=new Date()
+selectedDate=toISO(new Date())
+render()
+}
+
+function prevMonth(){
+viewDate.setMonth(viewDate.getMonth()-1)
+render()
+}
+
+function nextMonth(){
+viewDate.setMonth(viewDate.getMonth()+1)
+render()
+}
+
+function render(){
+
+document.getElementById("monthName").innerText=
+viewDate.toLocaleDateString("it",{month:"long",year:"numeric"})
+
+const grid=document.getElementById("calendarGrid")
+grid.innerHTML=""
+
+let first=new Date(viewDate.getFullYear(),viewDate.getMonth(),1)
+let start=new Date(first)
+start.setDate(start.getDate()-((first.getDay()+6)%7))
+
+for(let i=0;i<42;i++){
+
+let d=new Date(start)
+d.setDate(start.getDate()+i)
+
+let iso=toISO(d)
+
+let day=document.createElement("div")
+day.className="day"
+
+if(iso===selectedDate) day.classList.add("selected")
+
+day.onclick=()=>{selectedDate=iso;render()}
+
+let count=events.filter(e=>e.date===iso).length
+
+day.innerHTML=`
+<div class="dayNumber">${d.getDate()}</div>
+${count?`<div class="dayCount">${count}</div>`:""}
+`
+
+grid.appendChild(day)
+
+}
+
+renderEvents()
+
+}
+
+function renderEvents(){
+
+const list=document.getElementById("eventList")
+list.innerHTML=""
+
+let dayEvents=events.filter(e=>e.date===selectedDate)
+
+dayEvents.sort((a,b)=>a.time.localeCompare(b.time))
+
+dayEvents.forEach(e=>{
+
+let row=document.createElement("div")
+row.className="eventRow"
+
+row.innerHTML=`
+<div>
+<div class="pillTime">${e.time}</div>
+<div>${e.cliente}</div>
+<div>${hideMoney?"":("€ "+e.prezzo)}</div>
+</div>
+
+<div>
+<button class="smallBtn gray" onclick="editEvent('${e.id}')">Modifica</button>
+<button class="smallBtn danger" onclick="deleteEvent('${e.id}')">X</button>
+</div>
+`
+
+list.appendChild(row)
+
+})
+
+}
+
+function openAddModal(){
+
+modalBack.style.display="flex"
+
+mData.value=selectedDate
+mOra.value=""
+mCliente.value=""
+mPrezzo.value=""
+
+}
+
+function saveModal(){
+
+let date=mData.value
+let time=mOra.value
+let cliente=mCliente.value
+let prezzo=Number(mPrezzo.value)
+
+if(!date||!time||!cliente) return
+
+events.push({
+id:Date.now(),
+date,
+time,
+cliente,
+prezzo
+})
+
+save()
+
+modalBack.style.display="none"
+
+render()
+
+}
+
+function deleteEvent(id){
+
+events=events.filter(e=>e.id!=id)
+
+save()
+render()
+
+}
+
+/* ROTELLINA iPHONE → PASSA A CLIENTE DOPO "FINE" */
+
+document.getElementById("mOra").addEventListener("blur",()=>{
+setTimeout(()=>mCliente.focus(),150)
+})
+
+render()
+
 </script>
 
 </body>
