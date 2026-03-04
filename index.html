@@ -10,13 +10,17 @@
 
   <style>
     :root{
-      --bg:#f5efff;
-      --card:#f8f3ff;
-      --text:#111;
+      /* 🎀 Beauty theme */
+      --bg:#f5efff;        /* sfondo lilla chiarissimo */
+      --card:#f8f3ff;      /* card lilla chiarissimo */
+      --text:#121018;
       --muted:#6b7280;
-      --line:#e5e7eb;
+      --line:rgba(17,17,17,.08);
       --accent:#7b4bff;
       --danger:#ff3b30;
+
+      --shadow: 0 10px 30px rgba(17, 12, 34, .06);
+      --shadow2: 0 1px 10px rgba(17, 12, 34, .05);
     }
 
     body{
@@ -29,8 +33,8 @@
     /* Top bar stile iOS */
     .topbar{
       position:sticky; top:0; z-index:10;
-      background:rgba(242,242,247,.85);
-      backdrop-filter: blur(12px);
+      background:rgba(245,239,255,.82);
+      backdrop-filter: blur(14px);
       border-bottom:1px solid var(--line);
       padding:14px 14px 10px;
     }
@@ -38,13 +42,14 @@
       display:flex; align-items:center; justify-content:space-between; gap:10px;
     }
     .title{
-      font-size:22px; font-weight:800;
+      font-size:22px; font-weight:900;
+      letter-spacing:.2px;
     }
     .btnIcon{
       width:42px; height:42px;
       border:none; border-radius:14px;
-      background:var(--card);
-      box-shadow: 0 1px 8px rgba(0,0,0,.06);
+      background:rgba(248,243,255,.9);
+      box-shadow: var(--shadow2);
       font-size:22px;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
@@ -58,7 +63,7 @@
       margin-top:10px;
     }
     .monthName{
-      font-size:18px; font-weight:800;
+      font-size:18px; font-weight:900;
     }
     .navBtn{
       border:none; background:transparent; cursor:pointer;
@@ -71,8 +76,9 @@
       text-align:center;
       margin-top:6px;
       font-size:13px;
-      font-weight:800;
+      font-weight:900;
       color: var(--accent);
+      letter-spacing:.1px;
     }
 
     /* Calendar grid */
@@ -82,11 +88,11 @@
       margin: 0 auto;
     }
     .card{
-      background:var(--card);
-      border-radius:18px;
-      box-shadow: 0 1px 10px rgba(0,0,0,.06);
+      background:rgba(248,243,255,.95);
+      border-radius:20px;
+      box-shadow: var(--shadow);
       overflow:hidden;
-      border: 1px solid rgba(0,0,0,.04);
+      border: 1px solid rgba(17,17,17,.06);
     }
 
     .weekdays{
@@ -104,8 +110,8 @@
     }
 
     .day{
-      height: 54px;
-      border-radius: 14px;
+      height: 56px;
+      border-radius: 16px;
       margin: 4px;
       display:flex;
       align-items:flex-start;
@@ -114,14 +120,24 @@
       cursor:pointer;
       position:relative;
       user-select:none;
+      transition: transform .08s ease, background .12s ease;
     }
-    .day:hover{ background: rgba(0,0,0,.04); }
-    .day.other{ color: #b8b8c4; }
-    .dayNumber{ font-weight:700; font-size:14px; }
+    .day:hover{ background: rgba(123,75,255,.06); }
+    .day:active{ transform: scale(.99); }
+    .day.other{ color: rgba(18,16,24,.35); }
+    .dayNumber{ font-weight:900; font-size:14px; }
 
+    /* ✅ Oggi evidenziato */
+    .day.today{
+      background: rgba(123,75,255,.08);
+      outline: 2px solid rgba(123,75,255,.18);
+    }
+
+    /* ✅ Selezionato */
     .day.selected{
-      background: rgba(123,75,255,.12);
-      outline: 2px solid rgba(123,75,255,.25);
+      background: rgba(123,75,255,.14);
+      outline: 2px solid rgba(123,75,255,.30);
+      box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
     /* ✅ giorni passati più grigi */
@@ -141,6 +157,7 @@
       padding:3px 6px;
       border-radius:999px;
       line-height:1;
+      box-shadow: 0 8px 18px rgba(123,75,255,.22);
     }
 
     /* ✅ totale € nel giorno (solo giorni passati + solo se € visibile) */
@@ -149,7 +166,7 @@
       left:6px;
       bottom:6px;
       font-size:11px;
-      font-weight:800;
+      font-weight:900;
       color: var(--accent);
     }
 
@@ -162,15 +179,15 @@
     .sectionHeader h2{
       margin:0;
       font-size:16px;
-      font-weight:800;
+      font-weight:900;
     }
     .muted{ color:var(--muted); font-size:13px; }
 
     .eventList{
-      background:var(--card);
-      border-radius:18px;
-      box-shadow: 0 1px 10px rgba(0,0,0,.06);
-      border: 1px solid rgba(0,0,0,.04);
+      background:rgba(248,243,255,.95);
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(17,17,17,.06);
       overflow:hidden;
     }
     .eventRow{
@@ -184,9 +201,9 @@
       display:flex; align-items:flex-start; gap:10px; min-width:0;
     }
     .pillTime{
-      background: rgba(123,75,255,.12);
+      background: rgba(123,75,255,.14);
       color: #3f2db3;
-      font-weight:800;
+      font-weight:900;
       font-size:12px;
       padding: 6px 10px;
       border-radius: 999px;
@@ -194,7 +211,7 @@
     }
     .eventText{ min-width:0; }
     .eventTitle{
-      font-weight:800;
+      font-weight:900;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .eventSub{
@@ -206,15 +223,15 @@
     .eventActions{ display:flex; gap:8px; }
     .smallBtn{
       border:none; cursor:pointer;
-      background: #111;
+      background: #14121a;
       color:#fff;
       padding: 8px 10px;
       border-radius: 12px;
-      font-weight:700;
+      font-weight:900;
       font-size:13px;
     }
     .smallBtn.danger{ background: var(--danger); }
-    .smallBtn.gray{ background: #e5e7eb; color:#111; }
+    .smallBtn.gray{ background: rgba(17,17,17,.10); color:#14121a; }
 
     /* Modal */
     .modalBack{
@@ -226,13 +243,14 @@
     }
     .modal{
       width:100%;
-      background: var(--card);
-      border-top-left-radius: 22px;
-      border-top-right-radius: 22px;
+      background: rgba(248,243,255,.98);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
       padding: 14px 14px 18px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,.2);
+      box-shadow: 0 -16px 40px rgba(0,0,0,.22);
       max-height: 85vh;
       overflow:auto;
+      border: 1px solid rgba(17,17,17,.06);
     }
     .modalHeader{
       display:flex; align-items:center; justify-content:space-between;
@@ -240,18 +258,19 @@
     }
     .modalTitle{ font-size:16px; font-weight:900; }
     .closeBtn{
-      border:none; background:#e5e7eb; border-radius: 12px;
-      padding: 8px 10px; cursor:pointer; font-weight:800;
+      border:none; background: rgba(17,17,17,.10); border-radius: 12px;
+      padding: 8px 10px; cursor:pointer; font-weight:900; color:#14121a;
     }
 
-    .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; }
+    .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; font-weight:800; }
     .input{
       width:100%;
       padding: 12px;
       border-radius: 14px;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(17,17,17,.10);
       font-size: 16px;
       box-sizing:border-box;
+      background: rgba(255,255,255,.55);
     }
     .primary{
       width:100%;
@@ -264,6 +283,7 @@
       font-weight:900;
       font-size:16px;
       cursor:pointer;
+      box-shadow: 0 14px 30px rgba(123,75,255,.25);
     }
 
     /* Floating + button */
@@ -279,7 +299,7 @@
       color:#fff;
       font-size: 30px;
       font-weight:900;
-      box-shadow: 0 10px 30px rgba(123,75,255,.35);
+      box-shadow: 0 16px 36px rgba(123,75,255,.30);
       cursor:pointer;
       z-index:50;
     }
@@ -293,7 +313,7 @@
 
     @media (min-width: 720px){
       .modalBack{ align-items:center; justify-content:center; }
-      .modal{ width: 520px; border-radius: 22px; }
+      .modal{ width: 520px; border-radius: 24px; }
     }
   </style>
 </head>
@@ -316,12 +336,10 @@
       <button class="navBtn" onclick="nextMonth()">›</button>
     </div>
 
-    <!-- ✅ Totale mese (nascosto di default, appare solo quando premi €) -->
     <div class="monthTotal" id="monthTotal" style="display:none;">Totale mese: € 0.00</div>
   </div>
 
   <div class="container">
-    <!-- ✅ id per swipe -->
     <div class="card" id="calendarCard">
       <div class="weekdays">
         <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
@@ -368,13 +386,10 @@
   </div>
 
 <script>
-  // ===== Storage =====
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
-  // event = { id, date:'YYYY-MM-DD', time:'HH:MM', cliente, prezzo }
 
-  // ===== Privacy incassi =====
-  // ✅ sempre nascosto quando apri/riapri l'app
+  // ✅ privacy: sempre nascosto quando riapri
   let hideMoney = true;
 
   function toggleMoney(){
@@ -385,12 +400,10 @@
     return hideMoney ? "—" : `€ ${euro(value)}`;
   }
 
-  // ===== State calendario =====
   const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  let viewDate = new Date(); // mese mostrato
+  let viewDate = new Date();
   let selectedDate = isoToday();
 
-  // ===== Utils =====
   function isoToday(){ return toISO(new Date()); }
   function toISO(d){
     const y = d.getFullYear();
@@ -413,11 +426,8 @@
   function uid(){
     return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
   }
-
-  // Lunedì come primo giorno (iOS in IT)
   function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
 
-  // ===== Date helpers (solo giorno) =====
   function dayKey(iso){
     const d = parseISO(iso);
     d.setHours(0,0,0,0);
@@ -432,7 +442,6 @@
     return dayKey(iso) < todayKey();
   }
 
-  // ✅ blocca data/ora passata (oggi incluso)
   function isPastDateTime(isoDate, hhmm){
     const now = new Date();
 
@@ -442,7 +451,7 @@
     const t = new Date();
     t.setHours(0,0,0,0);
 
-    if (d < t) return true; // giorno passato
+    if (d < t) return true;
 
     if (d.getTime() === t.getTime()) {
       const parts = String(hhmm || "").split(":");
@@ -454,16 +463,14 @@
       chosen.setSeconds(0,0);
       chosen.setHours(hh, mm, 0, 0);
 
-      return chosen <= now; // oggi ma ora passata (o uguale)
+      return chosen <= now;
     }
-
-    return false; // futuro
+    return false;
   }
 
   function updateFabState(){
     const fab = document.getElementById("fabAdd");
     if(!fab) return;
-
     const disabled = isPastDay(selectedDate);
     fab.classList.toggle("disabled", disabled);
     fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
@@ -473,15 +480,13 @@
     return events.filter(e => e.date === iso).length;
   }
   function totalForDay(iso){
-    return events
-      .filter(e => e.date === iso)
+    return events.filter(e => e.date === iso)
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  // ===== Totale settimana (lunedì-domenica) =====
   function weekStartMonday(iso){
     const d = parseISO(iso);
-    const day = (d.getDay() + 6) % 7; // lun=0..dom=6
+    const day = (d.getDay() + 6) % 7;
     d.setDate(d.getDate() - day);
     d.setHours(0,0,0,0);
     return d;
@@ -497,30 +502,25 @@
     return sum;
   }
 
-  // ===== Totale mese della vista (viewDate) =====
   function totalForMonthView(){
     const y = viewDate.getFullYear();
     const m = viewDate.getMonth();
-    return events
-      .filter(e => {
-        const d = parseISO(e.date);
-        return d.getFullYear() === y && d.getMonth() === m;
-      })
-      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
+    return events.filter(e => {
+      const d = parseISO(e.date);
+      return d.getFullYear() === y && d.getMonth() === m;
+    }).reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  // ===== Calendar render =====
   function render(){
-    // stato bottone €
     const moneyBtn = document.getElementById("moneyBtn");
     if (moneyBtn){
       moneyBtn.classList.toggle("moneyOff", hideMoney);
       moneyBtn.title = hideMoney ? "Incassi nascosti" : "Incassi visibili";
     }
 
-    document.getElementById("monthName").innerText = `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+    document.getElementById("monthName").innerText =
+      `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
-    // ✅ Totale mese sotto al mese: sempre nascosto finché non premi €
     const monthTotalEl = document.getElementById("monthTotal");
     if(monthTotalEl){
       if(hideMoney){
@@ -539,7 +539,8 @@
     const start = new Date(first);
     start.setDate(1 - firstDay);
 
-    // 42 celle
+    const todayISO = isoToday();
+
     for(let i=0;i<42;i++){
       const d = new Date(start);
       d.setDate(start.getDate()+i);
@@ -548,16 +549,16 @@
       const isOtherMonth = d.getMonth() !== viewDate.getMonth();
       const isSelected = iso === selectedDate;
       const isPast = isPastDay(iso);
+      const isToday = iso === todayISO;
 
       const count = countForDay(iso);
       const total = totalForDay(iso);
-
-      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
       const showDayTotal = (!hideMoney && isPast && total > 0);
 
       const dayEl = document.createElement("div");
       dayEl.className = "day"
         + (isOtherMonth ? " other":"")
+        + (isToday ? " today":"")
         + (isSelected ? " selected":"")
         + (isPast ? " past":"");
 
@@ -576,7 +577,6 @@
     renderEventsForSelectedDay();
   }
 
-  // ===== Events list =====
   function renderEventsForSelectedDay(){
     const list = document.getElementById("eventList");
     const empty = document.getElementById("emptyHint");
@@ -586,8 +586,7 @@
     const d = parseISO(selectedDate);
     label.innerText = `Appuntamenti • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
 
-    const dayEvents = events
-      .filter(e => e.date === selectedDate)
+    const dayEvents = events.filter(e => e.date === selectedDate)
       .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
 
     const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
@@ -629,7 +628,6 @@
     render();
   }
 
-  // ===== Modal add/edit =====
   let editingId = null;
 
   function openAddModal(){
@@ -677,7 +675,6 @@
       return;
     }
 
-    // ✅ blocca anche oggi con orario già passato
     if (isPastDateTime(date, time)) {
       alert("Non puoi inserire appuntamenti in una data/ora passata.");
       return;
@@ -709,7 +706,6 @@
     if(evt.target.id === "modalBack") closeModal();
   }
 
-  // ===== Month navigation =====
   function prevMonth(){
     viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
     render();
@@ -734,14 +730,11 @@
       .replaceAll("'","&#039;");
   }
 
-  // ✅ Swipe mese (iPhone-like)
   function enableMonthSwipe(){
     const el = document.getElementById("calendarCard");
     if(!el) return;
 
-    let startX = 0;
-    let startY = 0;
-    let tracking = false;
+    let startX = 0, startY = 0, tracking = false;
 
     el.addEventListener("touchstart", (e) => {
       if (!e.touches || e.touches.length !== 1) return;
@@ -767,7 +760,6 @@
     }, { passive: true });
   }
 
-  // ✅ quando torni nell'app (background -> foreground) nascondi sempre €
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       hideMoney = true;
@@ -775,7 +767,6 @@
     }
   });
 
-  // ✅ Safari: quando riapre da cache
   window.addEventListener("pageshow", () => {
     hideMoney = true;
     render();
