@@ -10,7 +10,6 @@
 
   <style>
     :root{
-      /* 🎀 Beauty theme */
       --bg:#f5efff;
       --card:#f8f3ff;
       --text:#121018;
@@ -134,20 +133,17 @@
     .day.other{ color: rgba(18,16,24,.35); }
     .dayNumber{ font-weight:900; font-size:14px; }
 
-    /* ✅ Oggi evidenziato */
     .day.today{
       background: rgba(123,75,255,.08);
       outline: 2px solid rgba(123,75,255,.18);
     }
 
-    /* ✅ Selezionato */
     .day.selected{
       background: rgba(123,75,255,.14);
       outline: 2px solid rgba(123,75,255,.30);
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-    /* ✅ giorni passati più grigi */
     .day.past{ opacity: 0.35; }
 
     /* ✅ Colori in base agli appuntamenti rimanenti */
@@ -164,7 +160,7 @@
       outline: 2px solid rgba(255,59,48,.22);
     }
 
-    /* Se il giorno è selezionato, deve vincere la selezione */
+    /* se selezionato, vince la selezione */
     .day.selected.level-green,
     .day.selected.level-yellow,
     .day.selected.level-red{
@@ -173,7 +169,7 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-    /* ✅ badge numero appuntamenti (rimanenti) */
+    /* ✅ badge rimanenti */
     .dayCount{
       position:absolute;
       right:6px;
@@ -187,13 +183,11 @@
       line-height:1;
       box-shadow: 0 8px 18px rgba(123,75,255,.22);
     }
-
-    /* ✅ Badge che cambia colore come il giorno */
     .dayCount.level-green{ background: var(--green); }
     .dayCount.level-yellow{ background: var(--yellow); color:#2b2300; }
     .dayCount.level-red{ background: var(--red); }
 
-    /* ✅ totale € nel giorno (solo giorni passati + solo se incassi visibili) */
+    /* ✅ totale € mini nel giorno (solo giorni passati + soldi visibili) */
     .dayTotalMini{
       position:absolute;
       left:6px;
@@ -214,7 +208,19 @@
       font-size:16px;
       font-weight:900;
     }
-    .muted{ color:var(--muted); font-size:13px; }
+
+    /* ✅ Totali Giorno/Settimana: stesso stile del Totale mese */
+    .totalsRow{
+      font-size:13px;
+      font-weight:900;
+      color: var(--accent);
+      letter-spacing:.1px;
+    }
+    .totalsRow.off{
+      color: var(--muted);
+      font-weight:800;
+      letter-spacing:0;
+    }
 
     .eventList{
       background:rgba(248,243,255,.95);
@@ -247,15 +253,25 @@
       font-weight:900;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
+
+    /* ✅ importo: stesso colore del Totale mese quando visibile */
     .eventSub{
       font-size:13px;
-      color:var(--muted);
       margin-top:2px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      color: var(--accent);
+      font-weight:900;
+      letter-spacing:.1px;
     }
+    .eventSub.off{
+      color: var(--muted);
+      font-weight:800;
+      letter-spacing:0;
+    }
+
     .eventActions{ display:flex; gap:8px; }
 
-    /* ✅ Bottoni beauty (Modifica/Elimina) */
+    /* Bottoni beauty */
     .smallBtn{
       border:none; cursor:pointer;
       padding: 8px 10px;
@@ -272,7 +288,6 @@
       color: #3f2db3;
       border: 1px solid rgba(123,75,255,.18);
     }
-
     .smallBtn.danger{
       background: rgba(255,59,48,.12);
       color: #c81e1e;
@@ -304,7 +319,6 @@
     }
     .modalTitle{ font-size:16px; font-weight:900; }
 
-    /* ✅ Chiudi beauty */
     .closeBtn{
       border:none;
       background: rgba(123,75,255,.10);
@@ -340,7 +354,7 @@
       box-shadow: 0 14px 30px rgba(123,75,255,.25);
     }
 
-    /* ✅ Floating + button più bello */
+    /* Floating + button */
     .fab{
       position:fixed;
       right: 16px;
@@ -359,7 +373,6 @@
     }
     .fab:active{ transform: scale(.98); }
 
-    /* ✅ stato disabilitato del + */
     .fab.disabled{
       opacity: .45;
       box-shadow: none;
@@ -379,7 +392,6 @@
       <div class="title">Calendario</div>
 
       <div style="display:flex; gap:10px;">
-        <!-- € per mostrare/nascondere incassi -->
         <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
         <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
       </div>
@@ -405,7 +417,7 @@
     <div class="section">
       <div class="sectionHeader">
         <h2 id="selectedLabel">Appuntamenti</h2>
-        <div class="muted" id="selectedTotal">Giorno: — • Settimana: —</div>
+        <div class="totalsRow off" id="selectedTotal">Giorno: — • Settimana: —</div>
       </div>
 
       <div class="eventList" id="eventList"></div>
@@ -444,15 +456,12 @@
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
 
-  // ✅ privacy: sempre nascosto quando riapri
+  // privacy: sempre nascosto quando riapri
   let hideMoney = true;
 
   function toggleMoney(){
     hideMoney = !hideMoney;
     render();
-  }
-  function moneyText(value){
-    return hideMoney ? "—" : `€ ${euro(value)}`;
   }
 
   const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
@@ -518,7 +527,7 @@
       chosen.setSeconds(0,0);
       chosen.setHours(hh, mm, 0, 0);
 
-      return chosen <= now; // oggi ma ora passata (o uguale)
+      return chosen <= now;
     }
     return false;
   }
@@ -531,13 +540,11 @@
     fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
   }
 
-  // ===== totali =====
   function totalForDay(iso){
     return events.filter(e => e.date === iso)
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  // ✅ Appuntamenti rimanenti nel giorno (badge)
   function countRemainingForDay(iso){
     if (isPastDay(iso)) return 0;
 
@@ -561,7 +568,6 @@
     return remaining;
   }
 
-  // ✅ livello colore in base ai rimanenti
   function levelFromRemaining(remaining){
     if (remaining >= 7) return "red";
     if (remaining >= 4) return "yellow";
@@ -597,7 +603,6 @@
   }
 
   function render(){
-    // stato bottone €
     const moneyBtn = document.getElementById("moneyBtn");
     if (moneyBtn){
       moneyBtn.classList.toggle("moneyOff", hideMoney);
@@ -607,7 +612,6 @@
     document.getElementById("monthName").innerText =
       `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
-    // Totale mese sotto al mese: nascosto finché non premi €
     const monthTotalEl = document.getElementById("monthTotal");
     if(monthTotalEl){
       if(hideMoney){
@@ -640,10 +644,9 @@
 
       const remaining = countRemainingForDay(iso);
       const level = levelFromRemaining(remaining);
-
       const total = totalForDay(iso);
-      const showDayTotal = (!hideMoney && isPast && total > 0);
 
+      const showDayTotal = (!hideMoney && isPast && total > 0);
       const levelClass = level ? ` level-${level}` : "";
 
       const dayEl = document.createElement("div");
@@ -686,7 +689,13 @@
     const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
     const totalWeek = totalForWeek(selectedDate);
 
-    totalEl.innerText = `Giorno: ${moneyText(totalDay)} • Settimana: ${moneyText(totalWeek)}`;
+    if (hideMoney) {
+      totalEl.classList.add("off");
+      totalEl.innerText = `Giorno: — • Settimana: —`;
+    } else {
+      totalEl.classList.remove("off");
+      totalEl.innerText = `Giorno: € ${euro(totalDay)} • Settimana: € ${euro(totalWeek)}`;
+    }
 
     list.innerHTML = "";
     if(dayEvents.length === 0){
@@ -698,12 +707,16 @@
     dayEvents.forEach(e => {
       const row = document.createElement("div");
       row.className = "eventRow";
+
+      const moneyClass = hideMoney ? "eventSub off" : "eventSub";
+      const moneyText = hideMoney ? "" : ("€ " + euro(e.prezzo));
+
       row.innerHTML = `
         <div class="eventLeft">
           <div class="pillTime">${e.time || "--:--"}</div>
           <div class="eventText">
             <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
-            <div class="eventSub">${hideMoney ? "" : ("€ " + euro(e.prezzo))}</div>
+            <div class="${moneyClass}">${moneyText}</div>
           </div>
         </div>
         <div class="eventActions">
@@ -740,6 +753,12 @@
     document.getElementById("mPrezzo").value = "";
 
     openModal();
+
+    // ✅ appena apri: focus su ORA (di solito apre subito il picker su iPhone)
+    setTimeout(() => {
+      const t = document.getElementById("mOra");
+      if(t){ t.focus(); t.click(); }
+    }, 120);
   }
 
   function openEditModal(id){
@@ -756,6 +775,12 @@
     document.getElementById("mPrezzo").value = e.prezzo ?? "";
 
     openModal();
+
+    // ✅ in modifica: focus su cliente (più comodo)
+    setTimeout(() => {
+      const c = document.getElementById("mCliente");
+      if(c) c.focus();
+    }, 120);
   }
 
   function saveModal(){
@@ -824,6 +849,28 @@
       .replaceAll("'","&#039;");
   }
 
+  // ✅ Flusso input: Ora -> Cliente -> Prezzo
+  function setupModalFlow(){
+    const ora = document.getElementById("mOra");
+    const cliente = document.getElementById("mCliente");
+    const prezzo = document.getElementById("mPrezzo");
+
+    if(ora && cliente){
+      ora.addEventListener("change", () => setTimeout(()=>cliente.focus(), 80));
+      ora.addEventListener("blur", () => {
+        if (ora.value) setTimeout(()=>cliente.focus(), 80);
+      });
+    }
+    if(cliente && prezzo){
+      cliente.addEventListener("keydown", (e) => {
+        if(e.key === "Enter"){
+          e.preventDefault();
+          prezzo.focus();
+        }
+      });
+    }
+  }
+
   // Swipe mese
   function enableMonthSwipe(){
     const el = document.getElementById("calendarCard");
@@ -867,12 +914,13 @@
     render();
   });
 
-  // ✅ aggiorna automaticamente colori/badge (ogni 30 secondi)
+  // aggiorna badge/colore rimanenti
   setInterval(() => {
     if (!document.hidden) render();
   }, 30000);
 
   enableMonthSwipe();
+  setupModalFlow();
   render();
 </script>
 
