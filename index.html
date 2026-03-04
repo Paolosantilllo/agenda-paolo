@@ -45,8 +45,12 @@
       font-size:22px;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
+      user-select:none;
     }
     .btnIcon:active{ transform: scale(.98); }
+    .btnIcon.moneyOff{
+      opacity:.55;
+    }
 
     .monthRow{
       display:flex; align-items:center; justify-content:center; gap:12px;
@@ -276,7 +280,11 @@
   <div class="topbar">
     <div class="topbarRow">
       <div class="title">Calendario</div>
-      <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
+        <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
+      </div>
     </div>
 
     <div class="monthRow">
@@ -338,6 +346,17 @@
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
   // event = { id, date:'YYYY-MM-DD', time:'HH:MM', cliente, prezzo }
 
+  // ===== Privacy incassi =====
+  let hideMoney = JSON.parse(localStorage.getItem("hideMoney") || "false");
+  function toggleMoney(){
+    hideMoney = !hideMoney;
+    localStorage.setItem("hideMoney", JSON.stringify(hideMoney));
+    render();
+  }
+  function moneyText(value){
+    return hideMoney ? "—" : `€ ${euro(value)}`;
+  }
+
   // ===== State calendario =====
   const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
   let viewDate = new Date(); // mese mostrato
@@ -375,6 +394,13 @@
 
   // ===== Calendar render =====
   function render(){
+    // stato bottone €
+    const moneyBtn = document.getElementById("moneyBtn");
+    if (moneyBtn){
+      moneyBtn.classList.toggle("moneyOff", hideMoney);
+      moneyBtn.title = hideMoney ? "Incassi nascosti" : "Incassi visibili";
+    }
+
     document.getElementById("monthName").innerText = `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
     const grid = document.getElementById("calendarGrid");
@@ -435,7 +461,7 @@
       .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
 
     let total = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
-    totalEl.innerText = `Totale: € ${euro(total)}`;
+    totalEl.innerText = `Totale: ${moneyText(total)}`;
 
     list.innerHTML = "";
     if(dayEvents.length === 0){
@@ -452,7 +478,7 @@
           <div class="pillTime">${e.time || "--:--"}</div>
           <div class="eventText">
             <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
-            <div class="eventSub">€ ${euro(e.prezzo)}</div>
+            <div class="eventSub">${hideMoney ? "" : ("€ " + euro(e.prezzo))}</div>
           </div>
         </div>
         <div class="eventActions">
@@ -514,6 +540,18 @@
       return;
     }
 
+    // ✅ blocca date passate (oggi è consentito)
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const selected = parseISO(date);
+    selected.setHours(0,0,0,0);
+
+    if (selected < today) {
+      alert("Non puoi inserire appuntamenti in una data passata.");
+      return;
+    }
+
     if(editingId){
       const i = events.findIndex(e => e.id === editingId);
       if(i !== -1){
@@ -524,7 +562,7 @@
     }
 
     save();
-    selectedDate = date; // vai al giorno scelto
+    selectedDate = date;      // vai al giorno scelto
     viewDate = parseISO(date); // porta il mese giusto
     closeModal();
     render();
