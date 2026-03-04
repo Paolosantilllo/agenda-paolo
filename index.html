@@ -341,6 +341,18 @@
       background: rgba(255,255,255,.55);
     }
 
+    /* ✅ fix tap input time: overlay invisibile */
+    .timeWrap{ position: relative; }
+    .timeTap{
+      position:absolute;
+      inset:0;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+
     .primary{
       width:100%;
       margin-top: 12px;
@@ -440,8 +452,10 @@
       <input class="input" type="date" id="mData">
 
       <div class="fieldLabel">Ora</div>
-      <!-- ✅ Rotellina iPhone -->
-      <input class="input" type="time" id="mOra" step="300">
+      <div class="timeWrap">
+        <input class="input" type="time" id="mOra" step="300">
+        <button type="button" class="timeTap" aria-label="Seleziona ora"></button>
+      </div>
 
       <div class="fieldLabel">Cliente</div>
       <input class="input" type="text" id="mCliente" placeholder="Nome cliente">
@@ -650,7 +664,6 @@
       const level = levelFromRemaining(remaining);
       const total = totalForDay(iso);
 
-      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
       const showDayTotal = (!hideMoney && isPast && total > 0);
       const levelClass = level ? ` level-${level}` : "";
 
@@ -704,7 +717,7 @@
 
     list.innerHTML = "";
     if(dayEvents.length === 0){
-      empty.innerText = "Nessun appuntamento per questo giorno. Premi + per aggiungere.";
+      empty.innerText = "Nessun appuntamento per questo giorno";
       return;
     }
     empty.innerText = "";
@@ -742,7 +755,6 @@
 
   let editingId = null;
 
-  // ✅ + apre popup e NON mette focus su niente
   function openAddModal(){
     if (isPastDay(selectedDate)) {
       alert("Non puoi aggiungere appuntamenti in una data passata.");
@@ -754,12 +766,11 @@
     document.getElementById("saveBtn").innerText = "Salva";
 
     document.getElementById("mData").value = selectedDate;
-    document.getElementById("mOra").value = "";        // vuoto: iOS può partire dall'ora attuale
+    document.getElementById("mOra").value = "";        // vuoto
     document.getElementById("mCliente").value = "";
     document.getElementById("mPrezzo").value = "";
 
     openModal();
-    // nessun focus: tocchi tu "Ora"
   }
 
   function openEditModal(id){
@@ -844,17 +855,33 @@
       .replaceAll("'","&#039;");
   }
 
-  // ✅ Flow: quando scegli l'ora -> focus su Cliente
-  function setupModalFlow(){
+  // ✅ Fix iOS: un tap sull'overlay apre subito la rotellina (quando possibile)
+  function setupTimeFix(){
     const ora = document.getElementById("mOra");
+    const tap = document.querySelector(".timeTap");
+    const cliente = document.getElementById("mCliente");
+
+    if(!ora || !tap) return;
+
+    tap.addEventListener("click", () => {
+      ora.focus();
+
+      if (typeof ora.showPicker === "function") {
+        try { ora.showPicker(); return; } catch {}
+      }
+      try { ora.click(); } catch {}
+    });
+
+    // quando scegli l’ora -> focus su Cliente
+    ora.addEventListener("change", () => {
+      if (ora.value && cliente) setTimeout(()=>cliente.focus(), 80);
+    });
+  }
+
+  // ✅ Flow Cliente -> Prezzo
+  function setupModalFlow(){
     const cliente = document.getElementById("mCliente");
     const prezzo = document.getElementById("mPrezzo");
-
-    if(ora && cliente){
-      ora.addEventListener("change", () => {
-        if (ora.value) setTimeout(()=>cliente.focus(), 80);
-      });
-    }
 
     if(cliente && prezzo){
       cliente.addEventListener("keydown", (e) => {
@@ -916,6 +943,7 @@
 
   enableMonthSwipe();
   setupModalFlow();
+  setupTimeFix();
   render();
 </script>
 
