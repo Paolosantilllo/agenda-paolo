@@ -738,6 +738,9 @@
 
   let editingId = null;
 
+  // ✅ COME VUOI TU:
+  // + apre il popup "Nuovo appuntamento" e NON mette focus su niente.
+  // Tu clicchi "Ora" e, quando scegli, passa a Cliente e poi Prezzo.
   function openAddModal(){
     if (isPastDay(selectedDate)) {
       alert("Non puoi aggiungere appuntamenti in una data passata.");
@@ -754,12 +757,7 @@
     document.getElementById("mPrezzo").value = "";
 
     openModal();
-
-    // ✅ cursore subito su Cliente (NON apre automaticamente l’orario)
-    setTimeout(() => {
-      const c = document.getElementById("mCliente");
-      if(c) c.focus();
-    }, 120);
+    // ✅ nessun focus automatico
   }
 
   function openEditModal(id){
@@ -776,11 +774,6 @@
     document.getElementById("mPrezzo").value = e.prezzo ?? "";
 
     openModal();
-
-    setTimeout(() => {
-      const c = document.getElementById("mCliente");
-      if(c) c.focus();
-    }, 120);
   }
 
   function saveModal(){
@@ -849,18 +842,18 @@
       .replaceAll("'","&#039;");
   }
 
-  // ✅ Flusso input: Ora -> Cliente -> Prezzo
+  // ✅ Flusso input: ORA -> CLIENTE -> PREZZO (senza blur per evitare comportamenti strani su iPhone)
   function setupModalFlow(){
     const ora = document.getElementById("mOra");
     const cliente = document.getElementById("mCliente");
     const prezzo = document.getElementById("mPrezzo");
 
     if(ora && cliente){
-      ora.addEventListener("change", () => setTimeout(()=>cliente.focus(), 80));
-      ora.addEventListener("blur", () => {
+      ora.addEventListener("change", () => {
         if (ora.value) setTimeout(()=>cliente.focus(), 80);
       });
     }
+
     if(cliente && prezzo){
       cliente.addEventListener("keydown", (e) => {
         if(e.key === "Enter"){
