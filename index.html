@@ -4,43 +4,43 @@
 <meta charset="UTF-8">
 <title>Agenda Paolo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body {
-  font-family: -apple-system;
-  background: #f4f4f4;
-  padding: 20px;
+body{
+font-family:-apple-system;
+background:#f4f4f4;
+padding:20px;
 }
-h1 {
-  text-align: center;
+
+h1{
+text-align:center;
 }
-input, button {
-  width: 100%;
-  padding: 12px;
-  margin: 5px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 16px;
+
+input,button{
+width:100%;
+padding:12px;
+margin:5px 0;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
 }
-button {
-  background: #7b4bff;
-  color: white;
-  border: none;
+
+button{
+background:#7b4bff;
+color:white;
+border:none;
 }
-table {
-  width: 100%;
-  margin-top: 20px;
-  border-collapse: collapse;
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
 }
-th, td {
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-}
-.total-box {
-  margin-top: 20px;
-  padding: 15px;
-  background: white;
-  border-radius: 10px;
+
+th,td{
+padding:8px;
+border-bottom:1px solid #ddd;
+text-align:center;
 }
 </style>
 </head>
@@ -56,10 +56,6 @@ th, td {
 
 <button onclick="salva()">Salva Appuntamento</button>
 
-<div class="total-box">
-<strong>Totale Mese: € <span id="totaleMese">0</span></strong>
-</div>
-
 <table>
 <thead>
 <tr>
@@ -67,7 +63,6 @@ th, td {
 <th>Ora</th>
 <th>Cliente</th>
 <th>Prezzo</th>
-<th>Azioni</th>
 </tr>
 </thead>
 
@@ -75,67 +70,49 @@ th, td {
 </table>
 
 <script>
+
 let appuntamenti = JSON.parse(localStorage.getItem("agendaPaolo")) || [];
 
-function salva() {
+function salva(){
+
 let data = document.getElementById("data").value;
 let ora = document.getElementById("ora").value;
 let cliente = document.getElementById("cliente").value;
 let prezzo = parseFloat(document.getElementById("prezzo").value);
 
-if (!data || !ora || !cliente || !prezzo) return;
+if(!data || !cliente || !prezzo) return;
 
-appuntamenti.push({data, ora, cliente, prezzo});
+appuntamenti.push({data,ora,cliente,prezzo});
 
 localStorage.setItem("agendaPaolo", JSON.stringify(appuntamenti));
 
-document.getElementById("cliente").value = "";
-document.getElementById("prezzo").value = "";
-document.getElementById("ora").value = "";
-
 aggiorna();
-}
 
-function elimina(index){
-appuntamenti.splice(index,1);
-localStorage.setItem("agendaPaolo", JSON.stringify(appuntamenti));
-aggiorna();
 }
 
 function aggiorna(){
 
 let lista = document.getElementById("lista");
-lista.innerHTML = "";
 
-let totale = 0;
-let meseCorrente = new Date().getMonth();
-let annoCorrente = new Date().getFullYear();
+lista.innerHTML="";
 
-appuntamenti.forEach((a,index)=>{
+appuntamenti.forEach(a=>{
 
-let dataApp = new Date(a.data);
-
-if(dataApp.getMonth()===meseCorrente && dataApp.getFullYear()===annoCorrente){
-totale += a.prezzo;
-}
-
-lista.innerHTML += `
+lista.innerHTML+=`
 <tr>
 <td>${a.data}</td>
 <td>${a.ora}</td>
 <td>${a.cliente}</td>
 <td>€ ${a.prezzo}</td>
-<td><button onclick="elimina(${index})">Elimina</button></td>
 </tr>
 `;
 
 });
 
-document.getElementById("totaleMese").innerText = totale.toFixed(2);
-
 }
 
 aggiorna();
+
 </script>
 
 </body>
