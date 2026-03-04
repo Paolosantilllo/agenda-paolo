@@ -215,6 +215,7 @@
       font-weight:900;
       color: var(--accent);
       letter-spacing:.1px;
+      text-align:right;
     }
     .totalsRow.off{
       color: var(--muted);
@@ -537,7 +538,7 @@
     if(!fab) return;
     const disabled = isPastDay(selectedDate);
     fab.classList.toggle("disabled", disabled);
-    fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
+    fab.title = disabled ? "Non puoi aggiungere appuntamenti in una data passata" : "Aggiungi";
   }
 
   function totalForDay(iso){
@@ -754,10 +755,10 @@
 
     openModal();
 
-    // ✅ appena apri: focus su ORA (di solito apre subito il picker su iPhone)
+    // ✅ cursore subito su Cliente (NON apre automaticamente l’orario)
     setTimeout(() => {
-      const t = document.getElementById("mOra");
-      if(t){ t.focus(); t.click(); }
+      const c = document.getElementById("mCliente");
+      if(c) c.focus();
     }, 120);
   }
 
@@ -776,7 +777,6 @@
 
     openModal();
 
-    // ✅ in modifica: focus su cliente (più comodo)
     setTimeout(() => {
       const c = document.getElementById("mCliente");
       if(c) c.focus();
