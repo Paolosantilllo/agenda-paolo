@@ -120,18 +120,28 @@
       opacity: 0.35;
     }
 
-    .dotRow{
+    /* ✅ badge numero appuntamenti */
+    .dayCount{
       position:absolute;
-      left:8px;
-      bottom:8px;
-      display:flex;
-      gap:4px;
-    }
-    .dot{
-      width:6px; height:6px;
-      border-radius:99px;
+      right:6px;
+      top:6px;
+      font-size:11px;
+      font-weight:900;
+      color:white;
       background: var(--accent);
-      opacity:.9;
+      padding:3px 6px;
+      border-radius:999px;
+      line-height:1;
+    }
+
+    /* ✅ totale € (solo giorni passati + solo se € visibile) */
+    .dayTotalMini{
+      position:absolute;
+      left:6px;
+      bottom:6px;
+      font-size:11px;
+      font-weight:800;
+      color: var(--accent);
     }
 
     /* Events list */
@@ -369,9 +379,7 @@
   let selectedDate = isoToday();
 
   // ===== Utils =====
-  function isoToday(){
-    return toISO(new Date());
-  }
+  function isoToday(){ return toISO(new Date()); }
   function toISO(d){
     const y = d.getFullYear();
     const m = String(d.getMonth()+1).padStart(2,"0");
@@ -382,22 +390,16 @@
     const [y,m,d] = iso.split("-").map(Number);
     return new Date(y, m-1, d);
   }
-  function euro(n){
-    return (Number(n||0)).toFixed(2);
-  }
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify(events));
-  }
+  function euro(n){ return (Number(n||0)).toFixed(2); }
+  function save(){ localStorage.setItem(KEY, JSON.stringify(events)); }
   function uid(){
     return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
   }
 
   // Lunedì come primo giorno (iOS in IT)
-  function mondayIndex(jsDay){ // js: 0=Dom..6=Sab -> 0=Lun..6=Dom
-    return (jsDay + 6) % 7;
-  }
+  function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
 
-  // ✅ helper per confrontare solo la data (senza orario)
+  // ===== Date helpers (solo giorno) =====
   function dayKey(iso){
     const d = parseISO(iso);
     d.setHours(0,0,0,0);
@@ -412,6 +414,34 @@
     return dayKey(iso) < todayKey();
   }
 
+  // ✅ blocca data/ora passata (oggi incluso)
+  function isPastDateTime(isoDate, hhmm){
+    const now = new Date();
+
+    const d = parseISO(isoDate);
+    d.setHours(0,0,0,0);
+
+    const t = new Date();
+    t.setHours(0,0,0,0);
+
+    if (d < t) return true; // giorno passato
+
+    if (d.getTime() === t.getTime()) {
+      const parts = String(hhmm || "").split(":");
+      const hh = Number(parts[0]);
+      const mm = Number(parts[1]);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
+
+      const chosen = new Date();
+      chosen.setSeconds(0,0);
+      chosen.setHours(hh, mm, 0, 0);
+
+      return chosen <= now; // oggi ma ora passata (o uguale)
+    }
+
+    return false; // futuro
+  }
+
   function updateFabState(){
     const fab = document.getElementById("fabAdd");
     if(!fab) return;
@@ -419,6 +449,15 @@
     const disabled = isPastDay(selectedDate);
     fab.classList.toggle("disabled", disabled);
     fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
+  }
+
+  function countForDay(iso){
+    return events.filter(e => e.date === iso).length;
+  }
+  function totalForDay(iso){
+    return events
+      .filter(e => e.date === iso)
+      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
   // ===== Calendar render =====
@@ -438,7 +477,7 @@
     const first = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
     const firstDay = mondayIndex(first.getDay());
     const start = new Date(first);
-    start.setDate(1 - firstDay); // inizio griglia
+    start.setDate(1 - firstDay);
 
     for(let i=0;i<42;i++){
       const d = new Date(start);
@@ -449,6 +488,12 @@
       const isSelected = iso === selectedDate;
       const isPast = isPastDay(iso);
 
+      const count = countForDay(iso);
+      const total = totalForDay(iso);
+
+      // totale € SOLO a giornata finita (giorni passati) e SOLO se incassi visibili
+      const showDayTotal = (!hideMoney && isPast && total > 0);
+
       const dayEl = document.createElement("div");
       dayEl.className = "day"
         + (isOtherMonth ? " other":"")
@@ -456,21 +501,12 @@
         + (isPast ? " past":"");
 
       dayEl.onclick = () => { selectedDate = iso; render(); };
-      dayEl.innerHTML = `<div class="dayNumber">${d.getDate()}</div>`;
 
-      // pallini (max 3) se ci sono eventi in quel giorno
-      const count = events.filter(e => e.date === iso).length;
-      if(count > 0){
-        const dots = document.createElement("div");
-        dots.className = "dotRow";
-        const show = Math.min(3, count);
-        for(let k=0;k<show;k++){
-          const dot = document.createElement("div");
-          dot.className = "dot";
-          dots.appendChild(dot);
-        }
-        dayEl.appendChild(dots);
-      }
+      dayEl.innerHTML = `
+        <div class="dayNumber">${d.getDate()}</div>
+        ${count > 0 ? `<div class="dayCount">${count}</div>` : ""}
+        ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
+      `;
 
       grid.appendChild(dayEl);
     }
@@ -534,7 +570,6 @@
   let editingId = null;
 
   function openAddModal(){
-    // ✅ blocca apertura nel passato
     if (isPastDay(selectedDate)) {
       alert("Non puoi aggiungere appuntamenti in una data passata.");
       return;
@@ -579,9 +614,9 @@
       return;
     }
 
-    // ✅ blocca SEMPRE date passate (anche se cambi data nel popup)
-    if (isPastDay(date)) {
-      alert("Non puoi inserire appuntamenti in una data passata.");
+    // ✅ blocca anche oggi con orario già passato
+    if (isPastDateTime(date, time)) {
+      alert("Non puoi inserire appuntamenti in una data/ora passata.");
       return;
     }
 
