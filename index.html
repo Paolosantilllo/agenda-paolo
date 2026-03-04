@@ -66,6 +66,15 @@
     }
     .navBtn:hover{ background: rgba(0,0,0,.05); }
 
+    /* ✅ Totale mese sotto al mese */
+    .monthTotal{
+      text-align:center;
+      margin-top:6px;
+      font-size:13px;
+      font-weight:800;
+      color: var(--accent);
+    }
+
     /* Calendar grid */
     .container{
       padding: 12px 14px 90px;
@@ -134,7 +143,7 @@
       line-height:1;
     }
 
-    /* ✅ totale € (solo giorni passati + solo se € visibile) */
+    /* ✅ totale € nel giorno (solo giorni passati + solo se € visibile) */
     .dayTotalMini{
       position:absolute;
       left:6px;
@@ -256,7 +265,6 @@
       font-size:16px;
       cursor:pointer;
     }
-    .primary:disabled{ opacity:.6; cursor:not-allowed; }
 
     /* Floating + button */
     .fab{
@@ -307,10 +315,13 @@
       <div class="monthName" id="monthName">—</div>
       <button class="navBtn" onclick="nextMonth()">›</button>
     </div>
+
+    <!-- ✅ Totale mese (nascosto di default, appare solo quando premi €) -->
+    <div class="monthTotal" id="monthTotal" style="display:none;">Totale mese: € 0.00</div>
   </div>
 
   <div class="container">
-    <!-- ✅ id per abilitare lo swipe -->
+    <!-- ✅ id per swipe -->
     <div class="card" id="calendarCard">
       <div class="weekdays">
         <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
@@ -321,8 +332,7 @@
     <div class="section">
       <div class="sectionHeader">
         <h2 id="selectedLabel">Appuntamenti</h2>
-        <!-- ✅ totale giorno + totale settimana -->
-        <div class="muted" id="selectedTotal">Giorno: € 0.00 • Settimana: € 0.00</div>
+        <div class="muted" id="selectedTotal">Giorno: — • Settimana: —</div>
       </div>
 
       <div class="eventList" id="eventList"></div>
@@ -361,12 +371,14 @@
   // ===== Storage =====
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
+  // event = { id, date:'YYYY-MM-DD', time:'HH:MM', cliente, prezzo }
 
   // ===== Privacy incassi =====
-  let hideMoney = JSON.parse(localStorage.getItem("hideMoney") || "false");
+  // ✅ sempre nascosto quando apri/riapri l'app
+  let hideMoney = true;
+
   function toggleMoney(){
     hideMoney = !hideMoney;
-    localStorage.setItem("hideMoney", JSON.stringify(hideMoney));
     render();
   }
   function moneyText(value){
@@ -375,7 +387,7 @@
 
   // ===== State calendario =====
   const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  let viewDate = new Date();
+  let viewDate = new Date(); // mese mostrato
   let selectedDate = isoToday();
 
   // ===== Utils =====
@@ -402,10 +414,10 @@
     return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
   }
 
-  // Lunedì come primo giorno
+  // Lunedì come primo giorno (iOS in IT)
   function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
 
-  // ===== Date helpers =====
+  // ===== Date helpers (solo giorno) =====
   function dayKey(iso){
     const d = parseISO(iso);
     d.setHours(0,0,0,0);
@@ -430,7 +442,7 @@
     const t = new Date();
     t.setHours(0,0,0,0);
 
-    if (d < t) return true;
+    if (d < t) return true; // giorno passato
 
     if (d.getTime() === t.getTime()) {
       const parts = String(hhmm || "").split(":");
@@ -442,10 +454,10 @@
       chosen.setSeconds(0,0);
       chosen.setHours(hh, mm, 0, 0);
 
-      return chosen <= now;
+      return chosen <= now; // oggi ma ora passata (o uguale)
     }
 
-    return false;
+    return false; // futuro
   }
 
   function updateFabState(){
@@ -485,8 +497,21 @@
     return sum;
   }
 
+  // ===== Totale mese della vista (viewDate) =====
+  function totalForMonthView(){
+    const y = viewDate.getFullYear();
+    const m = viewDate.getMonth();
+    return events
+      .filter(e => {
+        const d = parseISO(e.date);
+        return d.getFullYear() === y && d.getMonth() === m;
+      })
+      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
+  }
+
   // ===== Calendar render =====
   function render(){
+    // stato bottone €
     const moneyBtn = document.getElementById("moneyBtn");
     if (moneyBtn){
       moneyBtn.classList.toggle("moneyOff", hideMoney);
@@ -494,6 +519,17 @@
     }
 
     document.getElementById("monthName").innerText = `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
+    // ✅ Totale mese sotto al mese: sempre nascosto finché non premi €
+    const monthTotalEl = document.getElementById("monthTotal");
+    if(monthTotalEl){
+      if(hideMoney){
+        monthTotalEl.style.display = "none";
+      } else {
+        monthTotalEl.innerText = `Totale mese: € ${euro(totalForMonthView())}`;
+        monthTotalEl.style.display = "block";
+      }
+    }
 
     const grid = document.getElementById("calendarGrid");
     grid.innerHTML = "";
@@ -503,6 +539,7 @@
     const start = new Date(first);
     start.setDate(1 - firstDay);
 
+    // 42 celle
     for(let i=0;i<42;i++){
       const d = new Date(start);
       d.setDate(start.getDate()+i);
@@ -640,6 +677,7 @@
       return;
     }
 
+    // ✅ blocca anche oggi con orario già passato
     if (isPastDateTime(date, time)) {
       alert("Non puoi inserire appuntamenti in una data/ora passata.");
       return;
@@ -728,6 +766,20 @@
       else prevMonth();
     }, { passive: true });
   }
+
+  // ✅ quando torni nell'app (background -> foreground) nascondi sempre €
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      hideMoney = true;
+      render();
+    }
+  });
+
+  // ✅ Safari: quando riapre da cache
+  window.addEventListener("pageshow", () => {
+    hideMoney = true;
+    render();
+  });
 
   enableMonthSwipe();
   render();
