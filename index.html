@@ -1,960 +1,508 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agenda Paolo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Paolo</title>
 
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" href="icon.png">
+<style>
 
-  <style>
-    :root{
-      --bg:#f5efff;
-      --card:#f8f3ff;
-      --text:#121018;
-      --muted:#6b7280;
-      --line:rgba(17,17,17,.08);
+:root{
+--bg:#f5efff;
+--card:#ffffff;
+--accent:#7b4bff;
+--text:#111;
+--muted:#6b7280;
+--line:#e5e7eb;
 
-      --accent:#7b4bff;
-      --danger:#ff3b30;
+--green:#34c759;
+--yellow:#ffcc00;
+--red:#ff3b30;
+}
 
-      --green:#34c759;
-      --yellow:#ffcc00;
-      --red:#ff3b30;
+body{
+margin:0;
+font-family:-apple-system,system-ui;
+background:var(--bg);
+color:var(--text);
+}
 
-      --shadow: 0 10px 30px rgba(17, 12, 34, .06);
-      --shadow2: 0 1px 10px rgba(17, 12, 34, .05);
-    }
+.topbar{
+padding:16px;
+border-bottom:1px solid var(--line);
+background:white;
+position:sticky;
+top:0;
+z-index:10;
+}
 
-    body{
-      margin:0;
-      font-family:-apple-system, system-ui, Arial;
-      background:var(--bg);
-      color:var(--text);
-    }
+.topbarRow{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 
-    /* Top bar stile iOS */
-    .topbar{
-      position:sticky; top:0; z-index:10;
-      background:rgba(245,239,255,.82);
-      backdrop-filter: blur(14px);
-      border-bottom:1px solid var(--line);
-      padding:14px 14px 10px;
-    }
-    .topbarRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .title{
-      font-size:22px; font-weight:900;
-      letter-spacing:.2px;
-    }
+.title{
+font-size:22px;
+font-weight:800;
+}
 
-    .btnIcon{
-      width:42px; height:42px;
-      border:none; border-radius:14px;
-      background:rgba(248,243,255,.9);
-      box-shadow: var(--shadow2);
-      font-size:20px;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .08s ease, opacity .12s ease;
-    }
-    .btnIcon:active{ transform: scale(.98); }
-    .btnIcon.moneyOff{ opacity:.55; }
+.btnIcon{
+width:40px;
+height:40px;
+border-radius:12px;
+border:none;
+background:#f3f4f6;
+font-size:18px;
+cursor:pointer;
+}
 
-    .monthRow{
-      display:flex; align-items:center; justify-content:center; gap:12px;
-      margin-top:10px;
-    }
-    .monthName{
-      font-size:18px; font-weight:900;
-    }
-    .navBtn{
-      border:none; background:transparent; cursor:pointer;
-      font-size:20px; padding:8px 10px; border-radius:12px;
-    }
-    .navBtn:hover{ background: rgba(0,0,0,.05); }
+.monthRow{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+margin-top:8px;
+}
 
-    /* Totale mese sotto al mese */
-    .monthTotal{
-      text-align:center;
-      margin-top:6px;
-      font-size:13px;
-      font-weight:900;
-      color: var(--accent);
-      letter-spacing:.1px;
-    }
+.monthName{
+font-weight:700;
+}
 
-    /* Calendar grid */
-    .container{
-      padding: 12px 14px 90px;
-      max-width: 880px;
-      margin: 0 auto;
-    }
-    .card{
-      background:rgba(248,243,255,.95);
-      border-radius:20px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      border: 1px solid rgba(17,17,17,.06);
-    }
+.navBtn{
+border:none;
+background:none;
+font-size:20px;
+cursor:pointer;
+}
 
-    .weekdays{
-      display:grid; grid-template-columns: repeat(7, 1fr);
-      padding: 10px 10px 6px;
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
-      border-bottom:1px solid var(--line);
-    }
-    .grid{
-      display:grid; grid-template-columns: repeat(7, 1fr);
-      gap: 0;
-      padding: 6px;
-    }
+.monthTotal{
+text-align:center;
+font-weight:700;
+color:var(--accent);
+font-size:13px;
+margin-top:4px;
+}
 
-    .day{
-      height: 56px;
-      border-radius: 16px;
-      margin: 4px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:flex-start;
-      padding: 8px 8px;
-      cursor:pointer;
-      position:relative;
-      user-select:none;
-      transition: transform .08s ease, background .12s ease;
-    }
-    .day:hover{ background: rgba(123,75,255,.06); }
-    .day:active{ transform: scale(.99); }
-    .day.other{ color: rgba(18,16,24,.35); }
-    .dayNumber{ font-weight:900; font-size:14px; }
+.container{
+padding:16px;
+}
 
-    .day.today{
-      background: rgba(123,75,255,.08);
-      outline: 2px solid rgba(123,75,255,.18);
-    }
+.card{
+background:var(--card);
+border-radius:16px;
+box-shadow:0 2px 10px rgba(0,0,0,.06);
+overflow:hidden;
+}
 
-    .day.selected{
-      background: rgba(123,75,255,.14);
-      outline: 2px solid rgba(123,75,255,.30);
-      box-shadow: 0 6px 18px rgba(123,75,255,.12);
-    }
+.weekdays{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+padding:10px;
+font-size:12px;
+color:var(--muted);
+text-align:center;
+border-bottom:1px solid var(--line);
+}
 
-    .day.past{ opacity: 0.35; }
+.grid{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+padding:6px;
+}
 
-    /* Colori in base agli appuntamenti rimanenti */
-    .day.level-green{
-      background: rgba(52,199,89,.12);
-      outline: 2px solid rgba(52,199,89,.18);
-    }
-    .day.level-yellow{
-      background: rgba(255,204,0,.16);
-      outline: 2px solid rgba(255,204,0,.22);
-    }
-    .day.level-red{
-      background: rgba(255,59,48,.14);
-      outline: 2px solid rgba(255,59,48,.22);
-    }
+.day{
+height:54px;
+border-radius:12px;
+margin:4px;
+padding:6px;
+position:relative;
+cursor:pointer;
+}
 
-    /* se selezionato, vince la selezione */
-    .day.selected.level-green,
-    .day.selected.level-yellow,
-    .day.selected.level-red{
-      background: rgba(123,75,255,.14);
-      outline: 2px solid rgba(123,75,255,.30);
-      box-shadow: 0 6px 18px rgba(123,75,255,.12);
-    }
+.day.today{
+background:rgba(123,75,255,.15);
+}
 
-    /* badge rimanenti */
-    .dayCount{
-      position:absolute;
-      right:6px;
-      top:6px;
-      font-size:11px;
-      font-weight:900;
-      color:white;
-      background: var(--accent);
-      padding:3px 6px;
-      border-radius:999px;
-      line-height:1;
-      box-shadow: 0 8px 18px rgba(123,75,255,.22);
-    }
-    .dayCount.level-green{ background: var(--green); }
-    .dayCount.level-yellow{ background: var(--yellow); color:#2b2300; }
-    .dayCount.level-red{ background: var(--red); }
+.day.selected{
+outline:2px solid var(--accent);
+}
 
-    /* totale € mini nel giorno (solo giorni passati + soldi visibili) */
-    .dayTotalMini{
-      position:absolute;
-      left:6px;
-      bottom:6px;
-      font-size:11px;
-      font-weight:900;
-      color: var(--accent);
-    }
+.day.level-green{background:rgba(52,199,89,.2)}
+.day.level-yellow{background:rgba(255,204,0,.25)}
+.day.level-red{background:rgba(255,59,48,.25)}
 
-    /* Events list */
-    .section{ margin-top: 14px; }
-    .sectionHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin: 0 2px 8px;
-    }
-    .sectionHeader h2{
-      margin:0;
-      font-size:16px;
-      font-weight:900;
-    }
+.dayNumber{
+font-size:14px;
+font-weight:700;
+}
 
-    /* Totali Giorno/Settimana: stesso stile del Totale mese */
-    .totalsRow{
-      font-size:13px;
-      font-weight:900;
-      color: var(--accent);
-      letter-spacing:.1px;
-      text-align:right;
-    }
-    .totalsRow.off{
-      color: var(--muted);
-      font-weight:800;
-      letter-spacing:0;
-    }
+.dayCount{
+position:absolute;
+right:6px;
+top:6px;
+font-size:11px;
+padding:2px 6px;
+border-radius:999px;
+color:white;
+font-weight:700;
+}
 
-    .eventList{
-      background:rgba(248,243,255,.95);
-      border-radius:20px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(17,17,17,.06);
-      overflow:hidden;
-    }
-    .eventRow{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 12px 12px;
-      border-bottom:1px solid var(--line);
-      gap:12px;
-    }
-    .eventRow:last-child{ border-bottom:none; }
-    .eventLeft{
-      display:flex; align-items:flex-start; gap:10px; min-width:0;
-    }
-    .pillTime{
-      background: rgba(123,75,255,.14);
-      color: #3f2db3;
-      font-weight:900;
-      font-size:12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      white-space:nowrap;
-    }
-    .eventText{ min-width:0; }
-    .eventTitle{
-      font-weight:900;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
+.dayCount.level-green{background:var(--green)}
+.dayCount.level-yellow{background:var(--yellow);color:black}
+.dayCount.level-red{background:var(--red)}
 
-    /* importo: stesso colore del Totale mese quando visibile */
-    .eventSub{
-      font-size:13px;
-      margin-top:2px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      color: var(--accent);
-      font-weight:900;
-      letter-spacing:.1px;
-    }
-    .eventSub.off{
-      color: var(--muted);
-      font-weight:800;
-      letter-spacing:0;
-    }
+.section{
+margin-top:16px;
+}
 
-    .eventActions{ display:flex; gap:8px; }
+.sectionHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 
-    .smallBtn{
-      border:none; cursor:pointer;
-      padding: 8px 10px;
-      border-radius: 12px;
-      font-weight:900;
-      font-size:13px;
-      transition: transform .08s ease, opacity .12s ease;
-      background: transparent;
-    }
-    .smallBtn:active{ transform: scale(.99); }
+.eventList{
+margin-top:8px;
+background:white;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
 
-    .smallBtn.gray{
-      background: rgba(123,75,255,.12);
-      color: #3f2db3;
-      border: 1px solid rgba(123,75,255,.18);
-    }
-    .smallBtn.danger{
-      background: rgba(255,59,48,.12);
-      color: #c81e1e;
-      border: 1px solid rgba(255,59,48,.20);
-    }
+.eventRow{
+display:flex;
+justify-content:space-between;
+padding:12px;
+border-bottom:1px solid var(--line);
+}
 
-    /* Modal */
-    .modalBack{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.35);
-      display:none;
-      align-items:flex-end;
-      z-index:100;
-    }
-    .modal{
-      width:100%;
-      background: rgba(248,243,255,.98);
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      padding: 14px 14px 18px;
-      box-shadow: 0 -16px 40px rgba(0,0,0,.22);
-      max-height: 85vh;
-      overflow:auto;
-      border: 1px solid rgba(17,17,17,.06);
-    }
-    .modalHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom: 10px;
-    }
-    .modalTitle{ font-size:16px; font-weight:900; }
+.pillTime{
+background:rgba(123,75,255,.15);
+padding:4px 8px;
+border-radius:999px;
+font-size:12px;
+font-weight:700;
+}
 
-    .closeBtn{
-      border:none;
-      background: rgba(123,75,255,.10);
-      border: 1px solid rgba(123,75,255,.16);
-      border-radius: 12px;
-      padding: 8px 10px;
-      cursor:pointer;
-      font-weight:900;
-      color:#3f2db3;
-    }
+.smallBtn{
+border:none;
+padding:6px 8px;
+border-radius:10px;
+font-weight:700;
+cursor:pointer;
+}
 
-    .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; font-weight:800; }
-    .input{
-      width:100%;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(17,17,17,.10);
-      font-size: 16px;
-      box-sizing:border-box;
-      background: rgba(255,255,255,.55);
-    }
+.smallBtn.gray{background:#eee}
+.smallBtn.danger{background:#ffdada}
 
-    /* ✅ fix tap input time: overlay invisibile */
-    .timeWrap{ position: relative; }
-    .timeTap{
-      position:absolute;
-      inset:0;
-      background: transparent;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-    }
+.modalBack{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.4);
+display:none;
+align-items:flex-end;
+}
 
-    .primary{
-      width:100%;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border:none;
-      background: var(--accent);
-      color:white;
-      font-weight:900;
-      font-size:16px;
-      cursor:pointer;
-      box-shadow: 0 14px 30px rgba(123,75,255,.25);
-    }
+.modal{
+background:white;
+width:100%;
+border-radius:20px 20px 0 0;
+padding:16px;
+}
 
-    /* Floating + button */
-    .fab{
-      position:fixed;
-      right: 16px;
-      bottom: 20px;
-      width: 58px;
-      height: 58px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.35);
-      background: linear-gradient(180deg, rgba(123,75,255,1) 0%, rgba(98,55,255,1) 100%);
-      color:#fff;
-      font-size: 30px;
-      font-weight:900;
-      box-shadow: 0 18px 40px rgba(123,75,255,.32);
-      cursor:pointer;
-      z-index:50;
-    }
-    .fab:active{ transform: scale(.98); }
+.fieldLabel{
+font-size:12px;
+color:var(--muted);
+margin-top:10px;
+}
 
-    .fab.disabled{
-      opacity: .45;
-      box-shadow: none;
-    }
+.input{
+width:100%;
+padding:10px;
+border-radius:12px;
+border:1px solid #ddd;
+font-size:16px;
+}
 
-    @media (min-width: 720px){
-      .modalBack{ align-items:center; justify-content:center; }
-      .modal{ width: 520px; border-radius: 24px; }
-    }
-  </style>
+.primary{
+margin-top:12px;
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:var(--accent);
+color:white;
+font-weight:700;
+cursor:pointer;
+}
+
+.fab{
+position:fixed;
+bottom:20px;
+right:20px;
+width:56px;
+height:56px;
+border-radius:18px;
+background:var(--accent);
+color:white;
+font-size:30px;
+border:none;
+cursor:pointer;
+}
+
+</style>
 </head>
 
 <body>
 
-  <div class="topbar">
-    <div class="topbarRow">
-      <div class="title">Calendario</div>
+<div class="topbar">
 
-      <div style="display:flex; gap:10px;">
-        <button class="btnIcon moneyOff" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
-        <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
-      </div>
-    </div>
+<div class="topbarRow">
+<div class="title">Calendario</div>
 
-    <div class="monthRow">
-      <button class="navBtn" onclick="prevMonth()">‹</button>
-      <div class="monthName" id="monthName">—</div>
-      <button class="navBtn" onclick="nextMonth()">›</button>
-    </div>
+<div>
+<button class="btnIcon" onclick="toggleMoney()">€</button>
+<button class="btnIcon" onclick="goToday()">•</button>
+</div>
+</div>
 
-    <div class="monthTotal" id="monthTotal" style="display:none;">Totale mese: € 0.00</div>
-  </div>
+<div class="monthRow">
+<button class="navBtn" onclick="prevMonth()">‹</button>
+<div class="monthName" id="monthName"></div>
+<button class="navBtn" onclick="nextMonth()">›</button>
+</div>
 
-  <div class="container">
-    <div class="card" id="calendarCard">
-      <div class="weekdays">
-        <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
-      </div>
-      <div class="grid" id="calendarGrid"></div>
-    </div>
+<div id="monthTotal" class="monthTotal"></div>
 
-    <div class="section">
-      <div class="sectionHeader">
-        <h2 id="selectedLabel">Appuntamenti</h2>
-        <div class="totalsRow off" id="selectedTotal">Giorno: — • Settimana: —</div>
-      </div>
+</div>
 
-      <div class="eventList" id="eventList"></div>
-      <div class="muted" style="margin-top:10px" id="emptyHint"></div>
-    </div>
-  </div>
+<div class="container">
 
-  <button class="fab" id="fabAdd" onclick="openAddModal()" title="Aggiungi">+</button>
+<div class="card">
+<div class="weekdays">
+<div>Lun</div><div>Mar</div><div>Mer</div>
+<div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+</div>
 
-  <!-- MODAL -->
-  <div class="modalBack" id="modalBack" onclick="closeModalIfBackdrop(event)">
-    <div class="modal">
-      <div class="modalHeader">
-        <div class="modalTitle" id="modalTitle">Nuovo appuntamento</div>
-        <button class="closeBtn" onclick="closeModal()">Chiudi</button>
-      </div>
+<div class="grid" id="calendarGrid"></div>
+</div>
 
-      <div class="fieldLabel">Data</div>
-      <input class="input" type="date" id="mData">
+<div class="section">
 
-      <div class="fieldLabel">Ora</div>
-      <div class="timeWrap">
-        <input class="input" type="time" id="mOra" step="300">
-        <button type="button" class="timeTap" aria-label="Seleziona ora"></button>
-      </div>
+<div class="sectionHeader">
+<h3 id="selectedLabel">Appuntamenti</h3>
+<div id="selectedTotal"></div>
+</div>
 
-      <div class="fieldLabel">Cliente</div>
-      <input class="input" type="text" id="mCliente" placeholder="Nome cliente">
+<div class="eventList" id="eventList"></div>
 
-      <div class="fieldLabel">Prezzo (€)</div>
-      <input class="input" type="number" step="0.01" min="0" id="mPrezzo" placeholder="Es. 35">
+</div>
 
-      <button class="primary" id="saveBtn" onclick="saveModal()">Salva</button>
-      <div class="muted" style="margin-top:10px;">I dati restano salvati sul tuo dispositivo (localStorage).</div>
-    </div>
-  </div>
+</div>
+
+<button class="fab" onclick="openAddModal()">+</button>
+
+<div class="modalBack" id="modalBack">
+<div class="modal">
+
+<div class="fieldLabel">Data</div>
+<input class="input" type="date" id="mData">
+
+<div class="fieldLabel">Ora</div>
+<input class="input" type="time" id="mOra">
+
+<div class="fieldLabel">Cliente</div>
+<input class="input" id="mCliente">
+
+<div class="fieldLabel">Prezzo</div>
+<input class="input" type="number" id="mPrezzo">
+
+<button class="primary" onclick="saveModal()">Salva</button>
+
+</div>
+</div>
 
 <script>
-  const KEY = "agendaPaoloCalendarV1";
-  let events = JSON.parse(localStorage.getItem(KEY) || "[]");
 
-  // ✅ privacy: SEMPRE nascosto quando riapri
-  let hideMoney = true;
+const KEY="agendaPaoloCalendarV1"
+let events=JSON.parse(localStorage.getItem(KEY)||"[]")
 
-  function toggleMoney(){
-    hideMoney = !hideMoney;
-    render();
-  }
+let hideMoney=true
+let viewDate=new Date()
+let selectedDate=toISO(new Date())
 
-  const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  let viewDate = new Date();
-  let selectedDate = isoToday();
-
-  function isoToday(){ return toISO(new Date()); }
-  function toISO(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${day}`;
-  }
-  function parseISO(iso){
-    const [y,m,d] = iso.split("-").map(Number);
-    return new Date(y, m-1, d);
-  }
-  function toISODateOnly(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${day}`;
-  }
-  function euro(n){ return (Number(n||0)).toFixed(2); }
-  function save(){ localStorage.setItem(KEY, JSON.stringify(events)); }
-  function uid(){
-    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
-  }
-  function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
-
-  function dayKey(iso){
-    const d = parseISO(iso);
-    d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-  function todayKey(){
-    const t = new Date();
-    t.setHours(0,0,0,0);
-    return t.getTime();
-  }
-  function isPastDay(iso){
-    return dayKey(iso) < todayKey();
-  }
-
-  // ✅ blocca data/ora passata (oggi incluso)
-  function isPastDateTime(isoDate, hhmm){
-    const now = new Date();
-
-    const d = parseISO(isoDate);
-    d.setHours(0,0,0,0);
-
-    const t = new Date();
-    t.setHours(0,0,0,0);
-
-    if (d < t) return true;
-
-    if (d.getTime() === t.getTime()) {
-      const [hhS, mmS] = String(hhmm || "").split(":");
-      const hh = Number(hhS);
-      const mm = Number(mmS);
-      if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
-
-      const chosen = new Date();
-      chosen.setSeconds(0,0);
-      chosen.setHours(hh, mm, 0, 0);
-
-      return chosen <= now;
-    }
-    return false;
-  }
-
-  function updateFabState(){
-    const fab = document.getElementById("fabAdd");
-    if(!fab) return;
-    const disabled = isPastDay(selectedDate);
-    fab.classList.toggle("disabled", disabled);
-    fab.title = disabled ? "Non puoi aggiungere appuntamenti in una data passata" : "Aggiungi";
-  }
-
-  function totalForDay(iso){
-    return events.filter(e => e.date === iso)
-      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
-  }
-
-  // ✅ rimanenti: cala quando gli appuntamenti sono passati (solo oggi)
-  function countRemainingForDay(iso){
-    if (isPastDay(iso)) return 0;
-
-    const isToday = (dayKey(iso) === todayKey());
-    const dayEvents = events.filter(e => e.date === iso);
-
-    if (!isToday) return dayEvents.length;
-
-    const now = new Date();
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-    let remaining = 0;
-    for (const ev of dayEvents) {
-      const [hhS, mmS] = String(ev.time || "").split(":");
-      const hh = Number(hhS);
-      const mm = Number(mmS);
-      if (!Number.isFinite(hh) || !Number.isFinite(mm)) continue;
-      const evMinutes = hh * 60 + mm;
-      if (evMinutes > nowMinutes) remaining++;
-    }
-    return remaining;
-  }
-
-  function levelFromRemaining(remaining){
-    if (remaining >= 7) return "red";
-    if (remaining >= 4) return "yellow";
-    if (remaining >= 1) return "green";
-    return "";
-  }
-
-  function weekStartMonday(iso){
-    const d = parseISO(iso);
-    const day = (d.getDay() + 6) % 7;
-    d.setDate(d.getDate() - day);
-    d.setHours(0,0,0,0);
-    return d;
-  }
-  function totalForWeek(iso){
-    const start = weekStartMonday(iso);
-    let sum = 0;
-    for(let i=0;i<7;i++){
-      const d = new Date(start);
-      d.setDate(start.getDate()+i);
-      sum += totalForDay(toISODateOnly(d));
-    }
-    return sum;
-  }
-
-  function totalForMonthView(){
-    const y = viewDate.getFullYear();
-    const m = viewDate.getMonth();
-    return events.filter(e => {
-      const d = parseISO(e.date);
-      return d.getFullYear() === y && d.getMonth() === m;
-    }).reduce((s,e)=> s + Number(e.prezzo||0), 0);
-  }
-
-  function render(){
-    const moneyBtn = document.getElementById("moneyBtn");
-    if (moneyBtn){
-      moneyBtn.classList.toggle("moneyOff", hideMoney);
-      moneyBtn.title = hideMoney ? "Incassi nascosti" : "Incassi visibili";
-    }
-
-    document.getElementById("monthName").innerText =
-      `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
-
-    const monthTotalEl = document.getElementById("monthTotal");
-    if(monthTotalEl){
-      if(hideMoney){
-        monthTotalEl.style.display = "none";
-      } else {
-        monthTotalEl.innerText = `Totale mese: € ${euro(totalForMonthView())}`;
-        monthTotalEl.style.display = "block";
-      }
-    }
-
-    const grid = document.getElementById("calendarGrid");
-    grid.innerHTML = "";
-
-    const first = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
-    const firstDay = mondayIndex(first.getDay());
-    const start = new Date(first);
-    start.setDate(1 - firstDay);
-
-    const todayISO = isoToday();
-
-    for(let i=0;i<42;i++){
-      const d = new Date(start);
-      d.setDate(start.getDate()+i);
-
-      const iso = toISO(d);
-      const isOtherMonth = d.getMonth() !== viewDate.getMonth();
-      const isSelected = iso === selectedDate;
-      const isPast = isPastDay(iso);
-      const isToday = iso === todayISO;
-
-      const remaining = countRemainingForDay(iso);
-      const level = levelFromRemaining(remaining);
-      const total = totalForDay(iso);
-
-      const showDayTotal = (!hideMoney && isPast && total > 0);
-      const levelClass = level ? ` level-${level}` : "";
-
-      const dayEl = document.createElement("div");
-      dayEl.className = "day"
-        + (isOtherMonth ? " other":"")
-        + (isToday ? " today":"")
-        + (isSelected ? " selected":"")
-        + (isPast ? " past":"")
-        + levelClass;
-
-      dayEl.onclick = () => { selectedDate = iso; render(); };
-
-      const badgeClass = level ? `dayCount level-${level}` : "dayCount";
-
-      dayEl.innerHTML = `
-        <div class="dayNumber">${d.getDate()}</div>
-        ${remaining > 0 ? `<div class="${badgeClass}">${remaining}</div>` : ""}
-        ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
-      `;
-
-      grid.appendChild(dayEl);
-    }
-
-    updateFabState();
-    renderEventsForSelectedDay();
-  }
-
-  function renderEventsForSelectedDay(){
-    const list = document.getElementById("eventList");
-    const empty = document.getElementById("emptyHint");
-    const label = document.getElementById("selectedLabel");
-    const totalEl = document.getElementById("selectedTotal");
-
-    const d = parseISO(selectedDate);
-    label.innerText = `Appuntamenti • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
-
-    const dayEvents = events.filter(e => e.date === selectedDate)
-      .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
-
-    const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
-    const totalWeek = totalForWeek(selectedDate);
-
-    if (hideMoney) {
-      totalEl.classList.add("off");
-      totalEl.innerText = `Giorno: — • Settimana: —`;
-    } else {
-      totalEl.classList.remove("off");
-      totalEl.innerText = `Giorno: € ${euro(totalDay)} • Settimana: € ${euro(totalWeek)}`;
-    }
-
-    list.innerHTML = "";
-    if(dayEvents.length === 0){
-      empty.innerText = "Nessun appuntamento per questo giorno";
-      return;
-    }
-    empty.innerText = "";
-
-    dayEvents.forEach(e => {
-      const row = document.createElement("div");
-      row.className = "eventRow";
-
-      const moneyClass = hideMoney ? "eventSub off" : "eventSub";
-      const moneyText = hideMoney ? "" : ("€ " + euro(e.prezzo));
-
-      row.innerHTML = `
-        <div class="eventLeft">
-          <div class="pillTime">${e.time || "--:--"}</div>
-          <div class="eventText">
-            <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
-            <div class="${moneyClass}">${moneyText}</div>
-          </div>
-        </div>
-        <div class="eventActions">
-          <button class="smallBtn gray" onclick="openEditModal('${e.id}')">Modifica</button>
-          <button class="smallBtn danger" onclick="removeEvent('${e.id}')">Elimina</button>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-  }
-
-  function removeEvent(id){
-    if(!confirm("Vuoi eliminare questo appuntamento?")) return;
-    events = events.filter(e => e.id !== id);
-    save();
-    render();
-  }
-
-  let editingId = null;
-
-  function openAddModal(){
-    if (isPastDay(selectedDate)) {
-      alert("Non puoi aggiungere appuntamenti in una data passata.");
-      return;
-    }
-
-    editingId = null;
-    document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
-    document.getElementById("saveBtn").innerText = "Salva";
-
-    document.getElementById("mData").value = selectedDate;
-    document.getElementById("mOra").value = "";        // vuoto
-    document.getElementById("mCliente").value = "";
-    document.getElementById("mPrezzo").value = "";
-
-    openModal();
-  }
-
-  function openEditModal(id){
-    const e = events.find(x => x.id === id);
-    if(!e) return;
-
-    editingId = id;
-    document.getElementById("modalTitle").innerText = "Modifica appuntamento";
-    document.getElementById("saveBtn").innerText = "Salva modifiche";
-
-    document.getElementById("mData").value = e.date;
-    document.getElementById("mOra").value = e.time || "";
-    document.getElementById("mCliente").value = e.cliente || "";
-    document.getElementById("mPrezzo").value = e.prezzo ?? "";
-
-    openModal();
-  }
-
-  function saveModal(){
-    const date = document.getElementById("mData").value;
-    const time = document.getElementById("mOra").value;
-    const cliente = document.getElementById("mCliente").value.trim();
-    const prezzo = Number(document.getElementById("mPrezzo").value);
-
-    if(!date || !time || !cliente || !Number.isFinite(prezzo) || prezzo < 0){
-      alert("Compila: data, ora, cliente e prezzo.");
-      return;
-    }
-
-    if (isPastDateTime(date, time)) {
-      alert("Non puoi inserire appuntamenti in una data/ora passata.");
-      return;
-    }
-
-    if(editingId){
-      const i = events.findIndex(e => e.id === editingId);
-      if(i !== -1){
-        events[i] = { ...events[i], date, time, cliente, prezzo };
-      }
-    } else {
-      events.push({ id: uid(), date, time, cliente, prezzo });
-    }
-
-    save();
-    selectedDate = date;
-    viewDate = parseISO(date);
-    closeModal();
-    render();
-  }
-
-  function openModal(){
-    document.getElementById("modalBack").style.display = "flex";
-  }
-  function closeModal(){
-    document.getElementById("modalBack").style.display = "none";
-  }
-  function closeModalIfBackdrop(evt){
-    if(evt.target.id === "modalBack") closeModal();
-  }
-
-  function prevMonth(){
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
-    render();
-  }
-  function nextMonth(){
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
-    render();
-  }
-  function goToday(){
-    const t = new Date();
-    viewDate = new Date(t.getFullYear(), t.getMonth(), 1);
-    selectedDate = toISO(t);
-    render();
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  // ✅ Fix iOS: un tap sull'overlay apre subito la rotellina (quando possibile)
-  function setupTimeFix(){
-  const ora = document.getElementById("mOra");
-  const tap = document.querySelector(".timeTap");
-  const cliente = document.getElementById("mCliente");
-
-  if(!ora || !tap) return;
-
-  // apre la rotellina al primo tap
-  tap.addEventListener("click", () => {
-    ora.focus();
-
-    if (typeof ora.showPicker === "function") {
-      try { ora.showPicker(); return; } catch {}
-    }
-
-    try { ora.click(); } catch {}
-  });
-
-  // 👇 passa a Cliente SOLO quando chiudi la rotellina (tasto blu)
-  ora.addEventListener("blur", () => {
-    if (ora.value && cliente) {
-      setTimeout(()=>cliente.focus(), 120);
-    }
-  });
+function toISO(d){
+return d.toISOString().slice(0,10)
 }
 
-    // quando scegli l’ora -> focus su Cliente
-    ora.addEventListener("change", () => {
-      if (ora.value && cliente) setTimeout(()=>cliente.focus(), 80);
-    });
-  }
+function save(){
+localStorage.setItem(KEY,JSON.stringify(events))
+}
 
-  // ✅ Flow Cliente -> Prezzo
-  function setupModalFlow(){
-    const cliente = document.getElementById("mCliente");
-    const prezzo = document.getElementById("mPrezzo");
+function toggleMoney(){
+hideMoney=!hideMoney
+render()
+}
 
-    if(cliente && prezzo){
-      cliente.addEventListener("keydown", (e) => {
-        if(e.key === "Enter"){
-          e.preventDefault();
-          prezzo.focus();
-        }
-      });
-    }
-  }
+function goToday(){
+viewDate=new Date()
+selectedDate=toISO(new Date())
+render()
+}
 
-  // Swipe mese
-  function enableMonthSwipe(){
-    const el = document.getElementById("calendarCard");
-    if(!el) return;
+function prevMonth(){
+viewDate.setMonth(viewDate.getMonth()-1)
+render()
+}
 
-    let startX = 0, startY = 0, tracking = false;
+function nextMonth(){
+viewDate.setMonth(viewDate.getMonth()+1)
+render()
+}
 
-    el.addEventListener("touchstart", (e) => {
-      if (!e.touches || e.touches.length !== 1) return;
-      tracking = true;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    }, { passive: true });
+function render(){
 
-    el.addEventListener("touchend", (e) => {
-      if(!tracking) return;
-      tracking = false;
+const grid=document.getElementById("calendarGrid")
+grid.innerHTML=""
 
-      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
-      if(!t) return;
+document.getElementById("monthName").innerText=
+viewDate.toLocaleDateString("it",{month:"long",year:"numeric"})
 
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
+let first=new Date(viewDate.getFullYear(),viewDate.getMonth(),1)
+let start=new Date(first)
+start.setDate(start.getDate()-((first.getDay()+6)%7))
 
-      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+for(let i=0;i<42;i++){
 
-      if (dx < 0) nextMonth();
-      else prevMonth();
-    }, { passive: true });
-  }
+let d=new Date(start)
+d.setDate(start.getDate()+i)
 
-  // ✅ quando torni nell'app: incassi nascosti
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      hideMoney = true;
-      render();
-    }
-  });
-  window.addEventListener("pageshow", () => {
-    hideMoney = true;
-    render();
-  });
+let iso=toISO(d)
 
-  // aggiorna badge/colore rimanenti
-  setInterval(() => {
-    if (!document.hidden) render();
-  }, 30000);
+let day=document.createElement("div")
+day.className="day"
 
-  enableMonthSwipe();
-  setupModalFlow();
-  setupTimeFix();
-  render();
+if(iso===toISO(new Date())) day.classList.add("today")
+if(iso===selectedDate) day.classList.add("selected")
+
+let remaining=countRemaining(iso)
+let level=remaining>=7?"red":remaining>=4?"yellow":remaining>=1?"green":""
+
+if(level) day.classList.add("level-"+level)
+
+day.onclick=()=>{selectedDate=iso;render()}
+
+day.innerHTML=`<div class="dayNumber">${d.getDate()}</div>
+${remaining?`<div class="dayCount level-${level}">${remaining}</div>`:""}`
+
+grid.appendChild(day)
+
+}
+
+renderEvents()
+
+}
+
+function countRemaining(date){
+
+let list=events.filter(e=>e.date===date)
+
+let now=new Date()
+
+return list.filter(e=>{
+let t=e.time.split(":")
+let ev=new Date(date)
+ev.setHours(t[0],t[1])
+return ev>now
+}).length
+
+}
+
+function renderEvents(){
+
+const list=document.getElementById("eventList")
+list.innerHTML=""
+
+let dayEvents=events.filter(e=>e.date===selectedDate)
+
+dayEvents.sort((a,b)=>a.time.localeCompare(b.time))
+
+dayEvents.forEach(e=>{
+
+let row=document.createElement("div")
+row.className="eventRow"
+
+row.innerHTML=`
+<div>
+<div class="pillTime">${e.time}</div>
+<div>${e.cliente}</div>
+<div>${hideMoney?"":("€ "+e.prezzo)}</div>
+</div>
+
+<div>
+<button class="smallBtn gray" onclick="editEvent('${e.id}')">Modifica</button>
+<button class="smallBtn danger" onclick="deleteEvent('${e.id}')">X</button>
+</div>
+`
+
+list.appendChild(row)
+
+})
+
+}
+
+function openAddModal(){
+
+document.getElementById("modalBack").style.display="flex"
+
+document.getElementById("mData").value=selectedDate
+document.getElementById("mOra").value=""
+document.getElementById("mCliente").value=""
+document.getElementById("mPrezzo").value=""
+
+}
+
+function saveModal(){
+
+let date=mData.value
+let time=mOra.value
+let cliente=mCliente.value
+let prezzo=Number(mPrezzo.value)
+
+if(!date||!time||!cliente) return
+
+events.push({
+id:Date.now(),
+date,
+time,
+cliente,
+prezzo
+})
+
+save()
+
+modalBack.style.display="none"
+
+render()
+
+}
+
+function deleteEvent(id){
+
+events=events.filter(e=>e.id!=id)
+
+save()
+render()
+
+}
+
+document.getElementById("mOra").addEventListener("blur",()=>{
+setTimeout(()=>mCliente.focus(),120)
+})
+
+render()
+
 </script>
 
 </body>
