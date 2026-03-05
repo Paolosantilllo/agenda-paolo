@@ -238,7 +238,6 @@
       padding-top:2px;
     }
 
-    /* ✅ Giorno sopra, Settimana sotto */
     .totalsStack{
       display:flex;
       flex-direction:column;
@@ -495,8 +494,8 @@
       <div class="fieldLabel">Cliente</div>
       <input class="input" type="text" id="mCliente" placeholder="Nome cliente">
 
-      <div class="fieldLabel">Prezzo (€)</div>
-      <input class="input" type="number" step="0.01" min="0" id="mPrezzo" placeholder="Es. 35">
+      <div class="fieldLabel">Prezzo (€) (facoltativo)</div>
+      <input class="input" type="number" step="0.01" min="0" id="mPrezzo" placeholder="Es. 35 (puoi lasciarlo vuoto)">
 
       <button class="primary" id="saveBtn" onclick="saveModal()">Salva</button>
     </div>
@@ -778,6 +777,11 @@
       row.className = "swipeRow" + (isEventDone(e) ? " done" : "");
       row.dataset.id = e.id;
 
+      // ✅ prezzo può essere nullo (mostra trattino)
+      const priceText = (e.prezzo === null || e.prezzo === undefined || e.prezzo === "")
+        ? "—"
+        : euro(e.prezzo);
+
       row.innerHTML = `
         <div class="swipeActions">
           <button class="actionBtn edit" type="button">Modifica</button>
@@ -789,7 +793,7 @@
             <div class="pillTime">${e.time || "--:--"}</div>
             <div class="eventText">
               <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
-              <div class="eventSub">${hideMoney ? "" : ("€ " + euro(e.prezzo))}</div>
+              <div class="eventSub">${hideMoney ? "" : ("€ " + priceText)}</div>
             </div>
           </div>
           <div style="width:18px; opacity:.35; font-weight:900;">›</div>
@@ -819,9 +823,7 @@
   }
 
   function attachSwipeHandlers(row){
-    let startX = 0;
-    let startY = 0;
-    let tracking = false;
+    let startX = 0, startY = 0, tracking = false;
 
     row.addEventListener("touchstart", (e) => {
       if (!e.touches || e.touches.length !== 1) return;
@@ -859,6 +861,7 @@
     });
   }
 
+  // ===== Modal add/edit =====
   let editingId = null;
 
   function openAddModal(){
@@ -890,7 +893,7 @@
     document.getElementById("mData").value = e.date;
     document.getElementById("mOra").value = e.time || "";
     document.getElementById("mCliente").value = e.cliente || "";
-    document.getElementById("mPrezzo").value = e.prezzo ?? "";
+    document.getElementById("mPrezzo").value = (e.prezzo === null || e.prezzo === undefined) ? "" : e.prezzo;
 
     openModal();
   }
@@ -899,14 +902,25 @@
     const date = document.getElementById("mData").value;
     const time = document.getElementById("mOra").value;
     const cliente = document.getElementById("mCliente").value.trim();
-    const prezzo = Number(document.getElementById("mPrezzo").value);
+    const prezzoRaw = document.getElementById("mPrezzo").value;
 
-    if(!date || !time || !cliente || !Number.isFinite(prezzo) || prezzo < 0){
-      alert("Compila: data, ora, cliente e prezzo.");
+    // ✅ prezzo FACOLTATIVO
+    let prezzo = null;
+    if (String(prezzoRaw).trim() !== "") {
+      prezzo = Number(prezzoRaw);
+      if (!Number.isFinite(prezzo) || prezzo < 0) {
+        alert("Il prezzo deve essere un numero valido (oppure lascialo vuoto).");
+        return;
+      }
+    }
+
+    if(!date || !time || !cliente){
+      alert("Compila: data, ora e cliente. Il prezzo è facoltativo.");
       return;
     }
 
-    if (isPastDateTime(date, time)) {
+    // ✅ BLOCCO SOLO PER NUOVI appuntamenti (non per modifica)
+    if(!editingId && isPastDateTime(date, time)) {
       alert("Non puoi inserire appuntamenti in una data/ora passata.");
       return;
     }
@@ -914,6 +928,7 @@
     if(editingId){
       const i = events.findIndex(e => e.id === editingId);
       if(i !== -1){
+        // ✅ Modifica permessa anche nel passato
         events[i] = { ...events[i], date, time, cliente, prezzo };
       }
     } else {
@@ -931,20 +946,15 @@
   function closeModal(){ document.getElementById("modalBack").style.display = "none"; }
   function closeModalIfBackdrop(evt){ if(evt.target.id === "modalBack") closeModal(); }
 
-  /* ✅ FLUSSO CORRETTO iPhone:
-     - Tocchi Ora -> NON deve spostare nulla
-     - Premi "Fine" (blu) -> si chiude il picker -> BLUR -> focus su Cliente
-  */
+  // ✅ flusso iPhone: premi "Fine" sull'ora -> focus Cliente
   const oraEl = document.getElementById("mOra");
   const clienteEl = document.getElementById("mCliente");
   const prezzoEl = document.getElementById("mPrezzo");
 
   oraEl.addEventListener("blur", () => {
-    // scatta quando premi "Fine"
     if (oraEl.value) setTimeout(() => clienteEl.focus(), 120);
   });
 
-  // Cliente -> Prezzo (quando premi Invio)
   clienteEl.addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
       e.preventDefault();
