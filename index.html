@@ -391,6 +391,13 @@
       box-sizing:border-box;
       background: rgba(255,255,255,.55);
     }
+
+    /* ✅ stato "bloccato" per input disabilitati */
+    .input[disabled]{
+      opacity:.6;
+      background: rgba(255,255,255,.35);
+    }
+
     .primary{
       width:100%;
       margin-top: 12px;
@@ -777,7 +784,6 @@
       row.className = "swipeRow" + (isEventDone(e) ? " done" : "");
       row.dataset.id = e.id;
 
-      // ✅ prezzo può essere nullo (mostra trattino)
       const priceText = (e.prezzo === null || e.prezzo === undefined || e.prezzo === "")
         ? "—"
         : euro(e.prezzo);
@@ -863,6 +869,7 @@
 
   // ===== Modal add/edit =====
   let editingId = null;
+  let editingLockedPast = false; // ✅ se true: data/ora bloccate
 
   function openAddModal(){
     if (isPastDay(selectedDate)) {
@@ -871,6 +878,10 @@
     }
 
     editingId = null;
+    editingLockedPast = false;
+
+    setEditLocks(false);
+
     document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
     document.getElementById("saveBtn").innerText = "Salva";
 
@@ -887,6 +898,12 @@
     if(!e) return;
 
     editingId = id;
+
+    // ✅ se è passato: blocca Data e Ora (modificabili solo Cliente + Prezzo)
+    editingLockedPast = isPastDateTime(e.date, e.time);
+
+    setEditLocks(editingLockedPast);
+
     document.getElementById("modalTitle").innerText = "Modifica appuntamento";
     document.getElementById("saveBtn").innerText = "Salva modifiche";
 
@@ -896,15 +913,31 @@
     document.getElementById("mPrezzo").value = (e.prezzo === null || e.prezzo === undefined) ? "" : e.prezzo;
 
     openModal();
+
+    // ✅ focus subito su Cliente quando modifichi un passato
+    setTimeout(() => document.getElementById("mCliente").focus(), 120);
+  }
+
+  function setEditLocks(lockPast){
+    const dataEl = document.getElementById("mData");
+    const oraEl = document.getElementById("mOra");
+
+    // lockPast=true => disabilita data/ora
+    dataEl.disabled = !!lockPast;
+    oraEl.disabled = !!lockPast;
   }
 
   function saveModal(){
-    const date = document.getElementById("mData").value;
-    const time = document.getElementById("mOra").value;
-    const cliente = document.getElementById("mCliente").value.trim();
-    const prezzoRaw = document.getElementById("mPrezzo").value;
+    const dateEl = document.getElementById("mData");
+    const timeEl = document.getElementById("mOra");
+    const clienteEl = document.getElementById("mCliente");
+    const prezzoEl = document.getElementById("mPrezzo");
 
-    // ✅ prezzo FACOLTATIVO
+    const date = dateEl.value;
+    const time = timeEl.value;
+    const cliente = clienteEl.value.trim();
+    const prezzoRaw = prezzoEl.value;
+
     let prezzo = null;
     if (String(prezzoRaw).trim() !== "") {
       prezzo = Number(prezzoRaw);
@@ -914,53 +947,52 @@
       }
     }
 
-    if(!date || !time || !cliente){
-      alert("Compila: data, ora e cliente. Il prezzo è facoltativo.");
+    if(!cliente){
+      alert("Inserisci il nome cliente.");
       return;
     }
 
-    // ✅ BLOCCO SOLO PER NUOVI appuntamenti (non per modifica)
-    if(!editingId && isPastDateTime(date, time)) {
-      alert("Non puoi inserire appuntamenti in una data/ora passata.");
-      return;
+    // ✅ se NON è lockPast, allora richiedi anche data+ora valide
+    if(!editingLockedPast){
+      if(!date || !time){
+        alert("Compila data e ora.");
+        return;
+      }
+      // ✅ blocco solo per NUOVI (come prima)
+      if(!editingId && isPastDateTime(date, time)) {
+        alert("Non puoi inserire appuntamenti in una data/ora passata.");
+        return;
+      }
     }
 
     if(editingId){
       const i = events.findIndex(e => e.id === editingId);
       if(i !== -1){
-        // ✅ Modifica permessa anche nel passato
-        events[i] = { ...events[i], date, time, cliente, prezzo };
+        // ✅ se lockPast: NON toccare date/time, aggiorna solo cliente+prezzo
+        if(editingLockedPast){
+          events[i] = { ...events[i], cliente, prezzo };
+        } else {
+          events[i] = { ...events[i], date, time, cliente, prezzo };
+        }
       }
     } else {
       events.push({ id: uid(), date, time, cliente, prezzo });
     }
 
     save();
-    selectedDate = date;
-    viewDate = parseISO(date);
+    selectedDate = editingLockedPast ? selectedDate : date;
+    if(!editingLockedPast) viewDate = parseISO(date);
+
     closeModal();
     render();
   }
 
   function openModal(){ document.getElementById("modalBack").style.display = "flex"; }
-  function closeModal(){ document.getElementById("modalBack").style.display = "none"; }
+  function closeModal(){
+    document.getElementById("modalBack").style.display = "none";
+    editingLockedPast = false;
+  }
   function closeModalIfBackdrop(evt){ if(evt.target.id === "modalBack") closeModal(); }
-
-  // ✅ flusso iPhone: premi "Fine" sull'ora -> focus Cliente
-  const oraEl = document.getElementById("mOra");
-  const clienteEl = document.getElementById("mCliente");
-  const prezzoEl = document.getElementById("mPrezzo");
-
-  oraEl.addEventListener("blur", () => {
-    if (oraEl.value) setTimeout(() => clienteEl.focus(), 120);
-  });
-
-  clienteEl.addEventListener("keydown", (e) => {
-    if(e.key === "Enter"){
-      e.preventDefault();
-      prezzoEl.focus();
-    }
-  });
 
   function prevMonth(){
     viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
