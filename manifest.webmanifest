@@ -1,0 +1,22 @@
+{
+  "name": "Agenda",
+  "short_name": "Agenda",
+  "description": "Agenda appuntamenti (PWA)",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5efff",
+  "theme_color": "#f5efff",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
