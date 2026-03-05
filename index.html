@@ -232,17 +232,25 @@
   z-index: 5;
 }
 
-/* codina della nuvoletta (50% più piccola) */
-.dayCount::after{
+/* codina a cerchietti verso il numero del giorno */
+.dayCount::before{
   content:"";
   position:absolute;
-  left:70%;
-  bottom:-3px;                 /* ↓ */
-  width:0; height:0;
-  border-left:4px solid transparent;  /* ↓ */
-  border-right:4px solid transparent; /* ↓ */
-  border-top:4px solid var(--accent); /* ↓ */
-  filter: drop-shadow(0 2px 1px rgba(0,0,0,.06));
+
+  /* parte dalla nuvoletta e va verso il numero */
+  left:-6px;
+  top:8px;
+
+  width:4px;
+  height:4px;
+  border-radius:50%;
+
+  background: var(--bubbleColor, var(--accent));
+
+  /* cerchi sempre più piccoli */
+  box-shadow:
+    -4px 3px 0 -1px var(--bubbleColor, var(--accent)),
+    -8px 6px 0 -2px var(--bubbleColor, var(--accent));
 }
 
 /* colori badge */
