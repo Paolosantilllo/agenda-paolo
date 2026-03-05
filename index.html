@@ -175,19 +175,47 @@
     }
 
     /* ✅ badge numero appuntamenti (rimanenti) */
-    .dayCount{
-      position:absolute;
-      right:6px;
-      top:6px;
-      font-size:11px;
-      font-weight:900;
-      color:white;
-      background: var(--accent);
-      padding:3px 6px;
-      border-radius:999px;
-      line-height:1;
-      box-shadow: 0 8px 18px rgba(123,75,255,.22);
-    }
+   .dayCount{
+  position:absolute;
+
+  /* ✅ più a destra */
+  right:-6px;
+
+  /* un po più in alto */
+  top:-10px;
+
+  /* ✅ nuvoletta */
+  min-width: 22px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:11px;
+  font-weight:900;
+  color:#fff;
+
+  background: var(--accent);
+  border: 1px solid rgba(255,255,255,.65);
+
+  box-shadow:
+    0 10px 22px rgba(123,75,255,.28),
+    0 1px 0 rgba(255,255,255,.35) inset;
+
+  line-height:1;
+  z-index: 5;
+}
+ .dayCount.level-green{ ... }
+.dayCount.level-yellow{ ... }
+.dayCount.level-red{ ... }
+
+    .dayCount.level-green::after{ border-top-color: var(--green); }
+.dayCount.level-yellow::after{ border-top-color: var(--yellow); }
+.dayCount.level-red::after{ border-top-color: var(--red); }
+    
     .dayCount.level-green{ background: var(--green); }
     .dayCount.level-yellow{ background: var(--yellow); color:#2b2300; }
     .dayCount.level-red{ background: var(--red); }
