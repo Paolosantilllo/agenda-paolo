@@ -174,74 +174,60 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-/* ✅ Nuvoletta numero appuntamenti (40% più piccola) */
-.dayCount{
-  position:absolute;
-  right:-7px;
-  top:-10px;
+    /* ✅ Nuvoletta numero appuntamenti (40% più piccola) */
+    .dayCount{
+      position:absolute;
+      right:-7px;
+      top:-10px;
 
-  min-width:16px;
-  height:14px;
-  padding:0 5px;
-  border-radius:999px;
+      min-width:16px;
+      height:14px;
+      padding:0 5px;
+      border-radius:999px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
 
-  font-size:9px;
-  font-weight:900;
-  color:#fff;
+      font-size:9px;
+      font-weight:900;
+      color:#fff;
 
-  /* colore base */
-  background: var(--bubbleColor, var(--accent));
+      background: var(--bubbleColor, var(--accent));
+      border:1px solid rgba(255,255,255,.70);
 
-  border:1px solid rgba(255,255,255,.70);
+      box-shadow:
+        0 8px 16px rgba(123,75,255,.22),
+        0 1px 0 rgba(255,255,255,.28) inset;
 
-  box-shadow:
-    0 8px 16px rgba(123,75,255,.22),
-    0 1px 0 rgba(255,255,255,.28) inset;
+      line-height:1;
+      z-index:5;
+    }
 
-  line-height:1;
-  z-index:5;
-}
+    /* ✅ Codina a cerchietti (parte dal numero giorno a destra e sale verso nuvoletta) */
+    .dayCount::before{
+      content:"";
+      position:absolute;
 
-/* ✅ Codina a cerchietti verso il numero del giorno */
-.dayCount::before{
-  content:"";
-  position:absolute;
+      right: 26px;
+      top: 18px;
 
-  left:-6px;
-  top:7px;
+      width:3px;
+      height:3px;
+      border-radius:50%;
 
-  width:4px;
-  height:4px;
-  border-radius:50%;
+      background: var(--bubbleColor, var(--accent));
+      box-shadow:
+        6px -5px 0 0 var(--bubbleColor, var(--accent)),
+        12px -10px 0 1px var(--bubbleColor, var(--accent));
+      opacity:.95;
+    }
 
-  background: var(--bubbleColor, var(--accent));
+    /* ✅ colori dinamici (nuvoletta + codina) */
+    .dayCount.level-green{ --bubbleColor: var(--green); background: var(--green); }
+    .dayCount.level-yellow{ --bubbleColor: var(--yellow); background: var(--yellow); color:#2b2300; }
+    .dayCount.level-red{ --bubbleColor: var(--red); background: var(--red); }
 
-  box-shadow:
-    -4px 3px 0 -1px var(--bubbleColor, var(--accent)),
-    -8px 6px 0 -2px var(--bubbleColor, var(--accent));
-}
-
-/* ✅ colori dinamici (nuvoletta + codina) */
-.dayCount.level-green{
-  --bubbleColor: var(--green);
-  background: var(--green);
-}
-
-.dayCount.level-yellow{
-  --bubbleColor: var(--yellow);
-  background: var(--yellow);
-  color:#2b2300;
-}
-
-.dayCount.level-red{
-  --bubbleColor: var(--red);
-  background: var(--red);
-}
-  
     /* ✅ totale € nel giorno (solo giorni passati + solo se incassi visibili) */
     .dayTotalMini{
       position:absolute;
@@ -255,7 +241,7 @@
     /* Events list */
     .section{ margin-top: 14px; }
     .sectionHeader{
-      display:flex; align-items:center; justify-content:space-between;
+      display:flex; align-items:flex-start; justify-content:space-between;
       margin: 0 2px 8px;
       gap: 10px;
     }
@@ -263,15 +249,20 @@
       margin:0;
       font-size:16px;
       font-weight:900;
+      padding-top:2px;
     }
 
-    /* ✅ Giorno/Settimana con colore come Totale mese */
-    .totalsLine{
-      font-size:13px;
-      font-weight:900;
-      color: var(--accent);
-      text-align:right;
+    /* ✅ Giorno sopra / Settimana sotto */
+    .totalsStack{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:2px;
+      line-height:1.05;
       white-space:nowrap;
+      color: var(--accent);
+      font-weight:900;
+      font-size:13px;
     }
 
     .eventList{
@@ -303,7 +294,7 @@
       padding: 10px 10px;
       transform: translateX(100%);
       transition: transform .18s ease;
-      pointer-events:none; /* attive solo quando aperto */
+      pointer-events:none;
     }
 
     .swipeContent{
@@ -343,16 +334,9 @@
     }
 
     /* ✅ appuntamento TERMINATO = verde */
-    .swipeRow.done .swipeContent{
-      background: rgba(52,199,89,.10);
-    }
-    .swipeRow.done .pillTime{
-      background: rgba(52,199,89,.16);
-      color: #0f6b2b;
-    }
-    .swipeRow.done .eventTitle{
-      color:#0f6b2b;
-    }
+    .swipeRow.done .swipeContent{ background: rgba(52,199,89,.10); }
+    .swipeRow.done .pillTime{ background: rgba(52,199,89,.16); color: #0f6b2b; }
+    .swipeRow.done .eventTitle{ color:#0f6b2b; }
 
     /* ✅ Bottoni azioni (solo nello swipe) */
     .actionBtn{
@@ -368,7 +352,6 @@
       transition: transform .08s ease;
     }
     .actionBtn:active{ transform: scale(.99); }
-
     .actionBtn.edit{
       background: rgba(123,75,255,.14);
       color: #3f2db3;
@@ -463,7 +446,6 @@
     @media (min-width: 720px){
       .modalBack{ align-items:center; justify-content:center; }
       .modal{ width: 520px; border-radius: 24px; }
-      /* su desktop permetti anche hover per vedere che è swipabile */
       .swipeRow:hover .swipeContent{ filter: brightness(0.995); }
     }
   </style>
@@ -501,7 +483,12 @@
     <div class="section">
       <div class="sectionHeader">
         <h2 id="selectedLabel">Appuntamenti</h2>
-        <div class="totalsLine" id="selectedTotal">Giorno: — • Settimana: —</div>
+
+        <!-- ✅ Giorno sopra / Settimana sotto -->
+        <div class="totalsStack" id="selectedTotalStack">
+          <div id="selectedTotalDay">Giorno: —</div>
+          <div id="selectedTotalWeek">Settimana: —</div>
+        </div>
       </div>
 
       <div class="eventList" id="eventList"></div>
@@ -532,7 +519,6 @@
       <input class="input" type="number" step="0.01" min="0" id="mPrezzo" placeholder="Es. 35">
 
       <button class="primary" id="saveBtn" onclick="saveModal()">Salva</button>
-      <div class="muted" style="margin-top:10px;"></div>
     </div>
   </div>
 
@@ -545,7 +531,7 @@
 
   function toggleMoney(){
     hideMoney = !hideMoney;
-    closeAllSwipes(); // se mostri incassi, pulisci swipe aperti
+    closeAllSwipes();
     render();
   }
   function moneyText(value){
@@ -625,16 +611,14 @@
     if(!fab) return;
     const disabled = isPastDay(selectedDate);
     fab.classList.toggle("disabled", disabled);
-    fab.title = disabled ? "Non puoi aggiungere in una data passata" : "Aggiungi";
+    fab.title = disabled ? "Non puoi aggiungere appuntamenti in una data passata" : "Aggiungi";
   }
 
-  // ===== totali =====
   function totalForDay(iso){
     return events.filter(e => e.date === iso)
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  // ✅ Appuntamenti rimanenti nel giorno (badge)
   function countRemainingForDay(iso){
     if (isPastDay(iso)) return 0;
 
@@ -658,7 +642,6 @@
     return remaining;
   }
 
-  // ✅ livello colore in base ai rimanenti
   function levelFromRemaining(remaining){
     if (remaining >= 7) return "red";
     if (remaining >= 4) return "yellow";
@@ -693,15 +676,10 @@
     }).reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  // ✅ Terminato? (verde)
   function isEventDone(ev){
-    // giorni passati = done
     if (isPastDay(ev.date)) return true;
-
-    // giorni futuri = non done
     if (dayKey(ev.date) > todayKey()) return false;
 
-    // oggi: done se time <= ora attuale
     const [hhS, mmS] = String(ev.time || "").split(":");
     const hh = Number(hhS);
     const mm = Number(mmS);
@@ -791,7 +769,9 @@
     const list = document.getElementById("eventList");
     const empty = document.getElementById("emptyHint");
     const label = document.getElementById("selectedLabel");
-    const totalEl = document.getElementById("selectedTotal");
+
+    const dayEl = document.getElementById("selectedTotalDay");
+    const weekEl = document.getElementById("selectedTotalWeek");
 
     const d = parseISO(selectedDate);
     label.innerText = `Appuntamenti • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
@@ -802,7 +782,8 @@
     const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
     const totalWeek = totalForWeek(selectedDate);
 
-    totalEl.innerText = `Giorno: ${moneyText(totalDay)} • Settimana: ${moneyText(totalWeek)}`;
+    dayEl.innerText = `Giorno: ${moneyText(totalDay)}`;
+    weekEl.innerText = `Settimana: ${moneyText(totalWeek)}`;
 
     list.innerHTML = "";
     closeAllSwipes();
@@ -843,7 +824,6 @@
       btnDel.addEventListener("click", (ev) => { ev.stopPropagation(); removeEvent(e.id); });
 
       attachSwipeHandlers(row);
-
       list.appendChild(row);
     });
   }
@@ -855,7 +835,6 @@
     render();
   }
 
-  // ===== Swipe handlers (Modifica/Elimina) =====
   function closeAllSwipes(exceptRow=null){
     document.querySelectorAll(".swipeRow.open").forEach(r => {
       if (exceptRow && r === exceptRow) return;
@@ -880,9 +859,7 @@
       if(!tracking) return;
       const dx = e.touches[0].clientX - startX;
       const dy = e.touches[0].clientY - startY;
-      if (Math.abs(dy) > Math.abs(dx)) {
-        tracking = false; // scroll verticale
-      }
+      if (Math.abs(dy) > Math.abs(dx)) tracking = false;
     }, { passive: true });
 
     row.addEventListener("touchend", (e) => {
@@ -897,19 +874,13 @@
 
       if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
 
-      if (dx < 0) row.classList.add("open");   // swipe left -> apri
-      else row.classList.remove("open");       // swipe right -> chiudi
+      if (dx < 0) row.classList.add("open");
+      else row.classList.remove("open");
     }, { passive: true });
 
-    // tap sulla riga: chiudi se aperto (senza fare altro)
     row.addEventListener("click", () => {
       if (row.classList.contains("open")) row.classList.remove("open");
     });
-
-    // tap fuori: chiudi tutti
-    document.addEventListener("click", (e) => {
-      if (!row.contains(e.target)) row.classList.remove("open");
-    }, { passive: true });
   }
 
   // ===== Modal add/edit =====
@@ -981,19 +952,24 @@
     render();
   }
 
-  function openModal(){
-    document.getElementById("modalBack").style.display = "flex";
-  }
-  function closeModal(){
-    document.getElementById("modalBack").style.display = "none";
-  }
-  function closeModalIfBackdrop(evt){
-    if(evt.target.id === "modalBack") closeModal();
-  }
+  function openModal(){ document.getElementById("modalBack").style.display = "flex"; }
+  function closeModal(){ document.getElementById("modalBack").style.display = "none"; }
+  function closeModalIfBackdrop(evt){ if(evt.target.id === "modalBack") closeModal(); }
 
-  // ✅ tuo flusso: scegli ora -> premi Fine -> focus su Cliente
-  document.getElementById("mOra").addEventListener("blur", () => {
-    setTimeout(() => document.getElementById("mCliente").focus(), 150);
+  /* ✅ FLUSSO: Ora -> Cliente -> Prezzo */
+  const oraEl = document.getElementById("mOra");
+  const clienteEl = document.getElementById("mCliente");
+  const prezzoEl = document.getElementById("mPrezzo");
+
+  function focusCliente(){ setTimeout(() => clienteEl.focus(), 120); }
+  oraEl.addEventListener("change", focusCliente);
+  oraEl.addEventListener("blur", focusCliente);
+
+  clienteEl.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      prezzoEl.focus();
+    }
   });
 
   function prevMonth(){
@@ -1023,7 +999,6 @@
       .replaceAll("'","&#039;");
   }
 
-  // Swipe mese
   function enableMonthSwipe(){
     const el = document.getElementById("calendarCard");
     if(!el) return;
@@ -1054,7 +1029,6 @@
     }, { passive: true });
   }
 
-  // quando torni nell'app: incassi nascosti
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       hideMoney = true;
@@ -1068,7 +1042,6 @@
     render();
   });
 
-  // ✅ aggiorna automaticamente badge/colori e "terminato" (ogni 30s)
   setInterval(() => {
     if (!document.hidden) render();
   }, 30000);
