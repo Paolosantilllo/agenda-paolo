@@ -202,44 +202,45 @@
   line-height:1;
   z-index: 5;
 }
-/* ✅ Nuvoletta numero appuntamenti (50% più piccola) */
+/* ✅ Nuvoletta numero appuntamenti (40% più piccola) */
 .dayCount{
   position:absolute;
   right:-7px;
-  top:-11px;
+  top:-10px;
 
-  min-width: 14px;     /* ↓ */
-  height: 12px;        /* ↓ */
-  padding: 0 4px;      /* ↓ */
-  border-radius: 999px;
+  min-width:16px;
+  height:14px;
+  padding:0 5px;
+  border-radius:999px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  font-size:8px;       /* ↓ */
+  font-size:9px;
   font-weight:900;
   color:#fff;
 
-  background: var(--accent);
-  border: 1px solid rgba(255,255,255,.70);
+  /* colore base */
+  background: var(--bubbleColor, var(--accent));
+
+  border:1px solid rgba(255,255,255,.70);
 
   box-shadow:
-    0 8px 14px rgba(123,75,255,.22),
+    0 8px 16px rgba(123,75,255,.22),
     0 1px 0 rgba(255,255,255,.28) inset;
 
   line-height:1;
-  z-index: 5;
+  z-index:5;
 }
 
-/* codina a cerchietti verso il numero del giorno */
+/* ✅ Codina a cerchietti verso il numero del giorno */
 .dayCount::before{
   content:"";
   position:absolute;
 
-  /* parte dalla nuvoletta e va verso il numero */
   left:-6px;
-  top:8px;
+  top:7px;
 
   width:4px;
   height:4px;
@@ -247,20 +248,27 @@
 
   background: var(--bubbleColor, var(--accent));
 
-  /* cerchi sempre più piccoli */
   box-shadow:
     -4px 3px 0 -1px var(--bubbleColor, var(--accent)),
     -8px 6px 0 -2px var(--bubbleColor, var(--accent));
 }
 
-/* colori badge */
-.dayCount.level-green{ background: var(--green); }
-.dayCount.level-yellow{ background: var(--yellow); color:#2b2300; }
-.dayCount.level-red{ background: var(--red); }
+/* ✅ colori dinamici (nuvoletta + codina) */
+.dayCount.level-green{
+  --bubbleColor: var(--green);
+  background: var(--green);
+}
 
-.dayCount.level-green::after{ border-top-color: var(--green); }
-.dayCount.level-yellow::after{ border-top-color: var(--yellow); }
-.dayCount.level-red::after{ border-top-color: var(--red); }
+.dayCount.level-yellow{
+  --bubbleColor: var(--yellow);
+  background: var(--yellow);
+  color:#2b2300;
+}
+
+.dayCount.level-red{
+  --bubbleColor: var(--red);
+  background: var(--red);
+}
   
     /* ✅ totale € nel giorno (solo giorni passati + solo se incassi visibili) */
     .dayTotalMini{
