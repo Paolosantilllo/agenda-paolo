@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agenda</title>
 
+  <!-- ✅ PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f5efff">
+
+  <!-- ✅ iOS standalone (schermo intero) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Agenda">
+
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" href="icon.png">
 
@@ -165,6 +174,7 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
+    /* Nuvoletta */
     .dayCount{
       position:absolute;
       right:-7px;
@@ -194,10 +204,10 @@
       z-index:5;
     }
 
+    /* Codina a cerchietti (parte dal numero del giorno verso la nuvoletta) */
     .dayCount::before{
       content:"";
       position:absolute;
-
       right: 24px;
       top: 22px;
 
@@ -392,7 +402,6 @@
       background: rgba(255,255,255,.55);
     }
 
-    /* ✅ stato "bloccato" per input disabilitati */
     .input[disabled]{
       opacity:.6;
       background: rgba(255,255,255,.35);
@@ -869,7 +878,7 @@
 
   // ===== Modal add/edit =====
   let editingId = null;
-  let editingLockedPast = false; // ✅ se true: data/ora bloccate
+  let editingLockedPast = false;
 
   function openAddModal(){
     if (isPastDay(selectedDate)) {
@@ -879,7 +888,6 @@
 
     editingId = null;
     editingLockedPast = false;
-
     setEditLocks(false);
 
     document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
@@ -891,6 +899,10 @@
     document.getElementById("mPrezzo").value = "";
 
     openModal();
+
+    // ✅ NON mettere focus su Ora da solo (così non “auto conferma”)
+    // Se vuoi, puoi lasciare tutto senza focus, oppure mettere su Ora:
+    // setTimeout(()=>document.getElementById("mOra").focus(), 120);
   }
 
   function openEditModal(id){
@@ -899,9 +911,8 @@
 
     editingId = id;
 
-    // ✅ se è passato: blocca Data e Ora (modificabili solo Cliente + Prezzo)
+    // se è passato: blocca Data e Ora
     editingLockedPast = isPastDateTime(e.date, e.time);
-
     setEditLocks(editingLockedPast);
 
     document.getElementById("modalTitle").innerText = "Modifica appuntamento";
@@ -914,17 +925,13 @@
 
     openModal();
 
-    // ✅ focus subito su Cliente quando modifichi un passato
+    // focus su Cliente quando modifichi (soprattutto se passato)
     setTimeout(() => document.getElementById("mCliente").focus(), 120);
   }
 
   function setEditLocks(lockPast){
-    const dataEl = document.getElementById("mData");
-    const oraEl = document.getElementById("mOra");
-
-    // lockPast=true => disabilita data/ora
-    dataEl.disabled = !!lockPast;
-    oraEl.disabled = !!lockPast;
+    document.getElementById("mData").disabled = !!lockPast;
+    document.getElementById("mOra").disabled = !!lockPast;
   }
 
   function saveModal(){
@@ -952,13 +959,11 @@
       return;
     }
 
-    // ✅ se NON è lockPast, allora richiedi anche data+ora valide
     if(!editingLockedPast){
       if(!date || !time){
         alert("Compila data e ora.");
         return;
       }
-      // ✅ blocco solo per NUOVI (come prima)
       if(!editingId && isPastDateTime(date, time)) {
         alert("Non puoi inserire appuntamenti in una data/ora passata.");
         return;
@@ -968,7 +973,6 @@
     if(editingId){
       const i = events.findIndex(e => e.id === editingId);
       if(i !== -1){
-        // ✅ se lockPast: NON toccare date/time, aggiorna solo cliente+prezzo
         if(editingLockedPast){
           events[i] = { ...events[i], cliente, prezzo };
         } else {
@@ -980,8 +984,10 @@
     }
 
     save();
-    selectedDate = editingLockedPast ? selectedDate : date;
-    if(!editingLockedPast) viewDate = parseISO(date);
+    if(!editingLockedPast){
+      selectedDate = date;
+      viewDate = parseISO(date);
+    }
 
     closeModal();
     render();
@@ -1051,6 +1057,34 @@
     }, { passive: true });
   }
 
+  // ✅ Focus flow:
+  // - dopo conferma ora (tasto blu “Fine” su iPhone) => il time input perde focus => focus su Cliente
+  // - dopo “Invio” su Cliente => focus su Prezzo
+  function setupFocusFlow(){
+    const oraEl = document.getElementById("mOra");
+    const clienteEl = document.getElementById("mCliente");
+    const prezzoEl = document.getElementById("mPrezzo");
+
+    // Quando si “chiude” il picker ora (Fine), l’input perde focus => blur
+    oraEl.addEventListener("blur", () => {
+      // Se è disabilitato (modifica passato), non fare niente
+      if (oraEl.disabled) return;
+
+      // Se NON hai scelto un'ora, non spostare il cursore
+      if (!oraEl.value) return;
+
+      setTimeout(() => clienteEl.focus(), 140);
+    });
+
+    // Cliente -> Prezzo con Invio
+    clienteEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        prezzoEl.focus();
+      }
+    });
+  }
+
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       hideMoney = true;
@@ -1069,7 +1103,15 @@
   }, 30000);
 
   enableMonthSwipe();
+  setupFocusFlow();
   render();
+
+  // ✅ Service Worker (offline)
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+    });
+  }
 </script>
 
 </body>
