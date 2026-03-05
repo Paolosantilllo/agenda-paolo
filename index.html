@@ -238,6 +238,7 @@
       padding-top:2px;
     }
 
+    /* ✅ Giorno sopra, Settimana sotto */
     .totalsStack{
       display:flex;
       flex-direction:column;
@@ -858,7 +859,6 @@
     });
   }
 
-  // ===== Modal add/edit =====
   let editingId = null;
 
   function openAddModal(){
@@ -931,15 +931,20 @@
   function closeModal(){ document.getElementById("modalBack").style.display = "none"; }
   function closeModalIfBackdrop(evt){ if(evt.target.id === "modalBack") closeModal(); }
 
-  /* ✅ FLUSSO: SOLO quando premi "Fine" (tasto blu) sull'ora -> focus Cliente */
+  /* ✅ FLUSSO CORRETTO iPhone:
+     - Tocchi Ora -> NON deve spostare nulla
+     - Premi "Fine" (blu) -> si chiude il picker -> BLUR -> focus su Cliente
+  */
   const oraEl = document.getElementById("mOra");
   const clienteEl = document.getElementById("mCliente");
   const prezzoEl = document.getElementById("mPrezzo");
 
-  oraEl.addEventListener("change", () => {
-    setTimeout(() => clienteEl.focus(), 120);
+  oraEl.addEventListener("blur", () => {
+    // scatta quando premi "Fine"
+    if (oraEl.value) setTimeout(() => clienteEl.focus(), 120);
   });
 
+  // Cliente -> Prezzo (quando premi Invio)
   clienteEl.addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
       e.preventDefault();
