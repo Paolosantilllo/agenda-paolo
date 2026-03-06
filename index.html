@@ -32,7 +32,7 @@
       --yellow:#ffcc00;
       --red:#ff3b30;
 
-      --home:#7b4bff;
+      --home:#ff2d92;
 
       --shadow: 0 10px 30px rgba(17, 12, 34, .06);
       --shadow2: 0 1px 10px rgba(17, 12, 34, .05);
@@ -201,90 +201,113 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-    /* Nuvoletta comune */
-    .cloudBadge{
-      --cloudColor: var(--accent);
-      position:absolute;
-      min-width:20px;
-      height:16px;
-      padding:0 8px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#fff;
-      font-size:9px;
-      font-weight:900;
-      line-height:1;
-      z-index:6;
-      background: var(--cloudColor);
-      border:1px solid rgba(255,255,255,.72);
-      border-radius:14px;
-      box-shadow:
-        0 8px 16px rgba(17,12,34,.16),
-        0 1px 0 rgba(255,255,255,.26) inset;
-    }
+  /* ✅ Nuvoletta LAVORO semplice */
+.dayCount{
+  position:absolute;
+  right:-7px;
+  top:-10px;
 
-    .cloudBadge::before,
-    .cloudBadge::after{
-      content:"";
-      position:absolute;
-      background: var(--cloudColor);
-      border:1px solid rgba(255,255,255,.72);
-      border-radius:50%;
-      box-sizing:border-box;
-      z-index:-1;
-    }
+  min-width:16px;
+  height:14px;
+  padding:0 5px;
+  border-radius:999px;
 
-    .cloudBadge::before{
-      width:14px;
-      height:14px;
-      left:-4px;
-      top:4px;
-    }
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-    .cloudBadge::after{
-      width:18px;
-      height:18px;
-      right:-4px;
-      top:2px;
-    }
+  font-size:9px;
+  font-weight:900;
+  color:#fff;
 
-    .cloudCore{
-      position:absolute;
-      inset:-6px 4px 2px 4px;
-      background: var(--cloudColor);
-      border:1px solid rgba(255,255,255,.72);
-      border-radius:50%;
-      z-index:-1;
-    }
+  background: var(--bubbleColor, var(--accent));
+  border:1px solid rgba(255,255,255,.70);
 
-    .cloudTop{
-      position:absolute;
-      width:18px;
-      height:18px;
-      left:50%;
-      top:-7px;
-      transform:translateX(-50%);
-      background: var(--cloudColor);
-      border:1px solid rgba(255,255,255,.72);
-      border-radius:50%;
-      z-index:-1;
-    }
+  box-shadow:
+    0 8px 16px rgba(123,75,255,.22),
+    0 1px 0 rgba(255,255,255,.28) inset;
 
-    .cloudBadge.work{
-      right:-6px;
-      top:-10px;
-    }
+  line-height:1;
+  z-index:5;
+}
 
-    .cloudBadge.home{
-      right:-6px;
-      bottom:-8px;
-      --cloudColor: var(--home);
-    }
+.dayCount::before{
+  content:"";
+  position:absolute;
+  right:24px;
+  top:22px;
 
-    .cloudBadge.level-green{ --cloudColor: var(--green); }
-    .cloudBadge.level-yellow{ --cloudColor: var(--yellow); color:#2b2300; }
-    .cloudBadge.level-red{ --cloudColor: var(--red); }
+  width:3px;
+  height:3px;
+  border-radius:50%;
+
+  background: var(--bubbleColor, var(--accent));
+  box-shadow:
+    6px -5px 0 0 var(--bubbleColor, var(--accent)),
+    12px -10px 0 1px var(--bubbleColor, var(--accent));
+  opacity:.95;
+}
+
+.dayCount.level-green{
+  --bubbleColor: var(--green);
+  background: var(--green);
+}
+.dayCount.level-yellow{
+  --bubbleColor: var(--yellow);
+  background: var(--yellow);
+  color:#2b2300;
+}
+.dayCount.level-red{
+  --bubbleColor: var(--red);
+  background: var(--red);
+}
+
+/* ✅ Nuvoletta CASA semplice sotto */
+.dayCountHome{
+  position:absolute;
+  right:-7px;
+  bottom:-8px;
+
+  min-width:16px;
+  height:14px;
+  padding:0 5px;
+  border-radius:999px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:9px;
+  font-weight:900;
+  color:#fff;
+
+  background: var(--home);
+  border:1px solid rgba(255,255,255,.70);
+
+  box-shadow:
+    0 8px 16px rgba(123,75,255,.22),
+    0 1px 0 rgba(255,255,255,.28) inset;
+
+  line-height:1;
+  z-index:5;
+}
+
+.dayCountHome::before{
+  content:"";
+  position:absolute;
+  right:24px;
+  top:-9px;
+
+  width:3px;
+  height:3px;
+  border-radius:50%;
+
+  background: var(--home);
+  box-shadow:
+    6px 5px 0 0 var(--home),
+    12px 10px 0 1px var(--home);
+  opacity:.95;
+}
 
     .dayTotalMini{
       position:absolute;
@@ -897,29 +920,14 @@
         render();
       };
 
-      const workBadgeClass = level ? `cloudBadge work level-${level}` : "cloudBadge work";
+      const workBadgeClass = level ? `dayCount level-${level}` : "dayCount";
 
-      dayEl.innerHTML = `
-        <div class="dayNumber">${d.getDate()}</div>
-
-        ${remainingWork > 0 ? `
-          <div class="${workBadgeClass}">
-            <span class="cloudCore"></span>
-            <span class="cloudTop"></span>
-            ${remainingWork}
-          </div>
-        ` : ""}
-
-        ${homeCount > 0 ? `
-          <div class="cloudBadge home">
-            <span class="cloudCore"></span>
-            <span class="cloudTop"></span>
-            ${homeCount}
-          </div>
-        ` : ""}
-
-        ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
-      `;
+dayEl.innerHTML = `
+  <div class="dayNumber">${d.getDate()}</div>
+  ${remainingWork > 0 ? `<div class="${workBadgeClass}">${remainingWork}</div>` : ""}
+  ${homeCount > 0 ? `<div class="dayCountHome">${homeCount}</div>` : ""}
+  ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
+`;
 
       grid.appendChild(dayEl);
     }
