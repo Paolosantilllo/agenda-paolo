@@ -262,54 +262,52 @@
       background: var(--red);
     }
 
-    /* Nuvoletta CASA */
-    .dayCountHome{
-      position:absolute;
-      right:0px;
-      top:26px;
+   .dayCountHome{
+  position:absolute;
+  right:1px;
+  top:31px;   /* ✅ più in basso */
 
-      min-width:14px;
-      height:8px;
-      padding:0 4px;
-      border-radius:999px;
+  min-width:14px;
+  height:12px;
+  padding:0 4px;
+  border-radius:999px;
 
-      display:flex;
-      align-items:center;
-      justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-      font-size:8px;
-      font-weight:900;
-      color:#fff;
+  font-size:8px;
+  font-weight:900;
+  color:#fff;
 
-      background: var(--home);
-      border:1px solid rgba(255,255,255,.70);
+  background: var(--home);
+  border:1px solid rgba(255,255,255,.70);
 
-      box-shadow:
-        0 8px 16px rgba(255,45,146,.22),
-        0 1px 0 rgba(255,255,255,.28) inset;
+  box-shadow:
+    0 8px 16px rgba(255,45,146,.22),
+    0 1px 0 rgba(255,255,255,.28) inset;
 
-      line-height:1;
-      z-index:5;
-    }
+  line-height:1;
+  z-index:5;
+}
 
-    .dayCountHome::before{
-      content:"";
-      position:absolute;
-      right:9px;
-      top:-8px;
+.dayCountHome::before{
+  content:"";
+  position:absolute;
+  right:15px;
+  top:-12px;  /* ✅ la codina parte più sotto */
 
-      width:2px;
-      height:2px;
-      border-radius:50%;
+  width:2px;
+  height:2px;
+  border-radius:50%;
 
-      background: var(--home);
-      box-shadow:
-        -3px -3px 0 0 var(--home),
-        -6px -6px 0 0 var(--home);
-      opacity:.95;
-    }
+  background: var(--home);
+  box-shadow:
+    -4px -4px 0 0 var(--home),
+    -8px -8px 0 0 var(--home);
 
-    .dayTotalMini{
+  opacity:.95;
+}    .dayTotalMini{
       position:absolute;
       left:6px;
       bottom:6px;
