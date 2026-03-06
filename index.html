@@ -160,11 +160,12 @@
     .day:hover{ background: rgba(123,75,255,.06); }
     .day:active{ transform: scale(.99); }
     .day.other{ color: rgba(18,16,24,.35); }
+
     .dayNumber{
       font-weight:900;
       font-size:14px;
       position:relative;
-      z-index:2;
+      z-index:3;
     }
 
     .day.today{
@@ -172,25 +173,28 @@
       outline: 2px solid rgba(123,75,255,.18);
     }
 
+    /* selettore piccolo del giorno */
     .day.selected{
-  background: transparent;
-  outline: none;
-  box-shadow: none;
-}
+      background: transparent;
+      outline: none;
+      box-shadow: none;
+    }
 
-.day.selected::after{
-  content:"";
-  position:absolute;
-  left:10px;
-  top:6px;
-  width:42px;
-  height:74px;
-  border-radius:22px;
-  background: rgba(123,75,255,.10);
-  border: 2px solid rgba(123,75,255,.22);
-  box-shadow: 0 6px 18px rgba(123,75,255,.10);
-  z-index:1;
-}
+    .day.selected::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      top:6px;
+      width:42px;
+      height:74px;
+      border-radius:22px;
+      background: rgba(123,75,255,.10);
+      border: 2px solid rgba(123,75,255,.22);
+      box-shadow: 0 6px 18px rgba(123,75,255,.10);
+      z-index:1;
+      pointer-events:none;
+    }
+
     .day.past{ opacity:.35; }
 
     .day.level-green{
@@ -206,12 +210,30 @@
       outline: 2px solid rgba(255,59,48,.22);
     }
 
+    /* anche se il giorno è colorato, da selezionato deve restare piccolo */
     .day.selected.level-green,
     .day.selected.level-yellow,
     .day.selected.level-red{
-      background: rgba(123,75,255,.14);
-      outline: 2px solid rgba(123,75,255,.30);
-      box-shadow: 0 6px 18px rgba(123,75,255,.12);
+      background: transparent;
+      outline: none;
+      box-shadow: none;
+    }
+
+    .day.selected.level-green::after,
+    .day.selected.level-yellow::after,
+    .day.selected.level-red::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      top:6px;
+      width:42px;
+      height:74px;
+      border-radius:22px;
+      background: rgba(123,75,255,.10);
+      border: 2px solid rgba(123,75,255,.22);
+      box-shadow: 0 6px 18px rgba(123,75,255,.10);
+      z-index:1;
+      pointer-events:none;
     }
 
     /* Nuvoletta LAVORO */
@@ -275,52 +297,54 @@
       background: var(--red);
     }
 
-   .dayCountHome{
-  position:absolute;
-  right:1px;
-  top:31px;   /* ✅ più in basso */
+    /* Nuvoletta CASA */
+    .dayCountHome{
+      position:absolute;
+      right:1px;
+      top:31px;
 
-  min-width:14px;
-  height:12px;
-  padding:0 4px;
-  border-radius:999px;
+      min-width:14px;
+      height:12px;
+      padding:0 4px;
+      border-radius:999px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
 
-  font-size:8px;
-  font-weight:900;
-  color:#fff;
+      font-size:8px;
+      font-weight:900;
+      color:#fff;
 
-  background: var(--home);
-  border:1px solid rgba(255,255,255,.70);
+      background: var(--home);
+      border:1px solid rgba(255,255,255,.70);
 
-  box-shadow:
-    0 8px 16px rgba(255,45,146,.22),
-    0 1px 0 rgba(255,255,255,.28) inset;
+      box-shadow:
+        0 8px 16px rgba(255,45,146,.22),
+        0 1px 0 rgba(255,255,255,.28) inset;
 
-  line-height:1;
-  z-index:5;
-}
+      line-height:1;
+      z-index:5;
+    }
 
-.dayCountHome::before{
-  content:"";
-  position:absolute;
-  right:15px;
-  top:-4px;   /* ✅ più in basso */
+    .dayCountHome::before{
+      content:"";
+      position:absolute;
+      right:15px;
+      top:-4px;
 
-  width:2px;
-  height:2px;
-  border-radius:50%;
+      width:2px;
+      height:2px;
+      border-radius:50%;
 
-  background: var(--home);
-  box-shadow:
-    -4px -3px 0 0 var(--home),
-    -8px -6px 0 0 var(--home);
+      background: var(--home);
+      box-shadow:
+        -4px -3px 0 0 var(--home),
+        -8px -6px 0 0 var(--home);
 
-  opacity:.95;
-}
+      opacity:.95;
+    }
+
     .dayTotalMini{
       position:absolute;
       left:6px;
@@ -328,6 +352,7 @@
       font-size:11px;
       font-weight:900;
       color: var(--accent);
+      z-index:3;
     }
 
     .section{ margin-top:14px; }
