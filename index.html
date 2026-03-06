@@ -211,30 +211,30 @@
     }
 
     /* anche se il giorno è colorato, da selezionato deve restare piccolo */
-    .day.selected.level-green,
-    .day.selected.level-yellow,
-    .day.selected.level-red{
-      background: transparent;
-      outline: none;
-      box-shadow: none;
-    }
+.day.selected.level-green,
+.day.selected.level-yellow,
+.day.selected.level-red{
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+}
 
-    .day.selected.level-green::after,
-    .day.selected.level-yellow::after,
-    .day.selected.level-red::after{
-      content:"";
-      position:absolute;
-      left:10px;
-      top:6px;
-      width:42px;
-      height:74px;
-      border-radius:22px;
-      background: rgba(123,75,255,.10);
-      border: 2px solid rgba(123,75,255,.22);
-      box-shadow: 0 6px 18px rgba(123,75,255,.10);
-      z-index:1;
-      pointer-events:none;
-    }
+.day.selected.level-green::after,
+.day.selected.level-yellow::after,
+.day.selected.level-red::after{
+  content:"";
+  position:absolute;
+  left:16px;
+  top:8px;
+  width:32px;
+  height:62px;
+  border-radius:18px;
+  background: rgba(123,75,255,.10);
+  border: 2px solid rgba(123,75,255,.22);
+  box-shadow: 0 6px 18px rgba(123,75,255,.10);
+  z-index:1;
+  pointer-events:none;
+}
 
     /* Nuvoletta LAVORO */
     .dayCount{
