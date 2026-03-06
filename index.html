@@ -317,6 +317,23 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
+    .eventType{
+      display:inline-block;
+      margin-top:4px;
+      font-size:11px;
+      font-weight:900;
+      padding:3px 8px;
+      border-radius:999px;
+    }
+    .eventType.work{
+      background: rgba(52,199,89,.14);
+      color:#157a36;
+    }
+    .eventType.home{
+      background: rgba(123,75,255,.12);
+      color:#5b34d6;
+    }
+
     .swipeRow.done .swipeContent{ background: rgba(52,199,89,.10); }
     .swipeRow.done .pillTime{ background: rgba(52,199,89,.16); color: #0f6b2b; }
     .swipeRow.done .eventTitle{ color:#0f6b2b; }
@@ -382,7 +399,7 @@
     }
 
     .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; font-weight:800; }
-    .input{
+    .input, .select{
       width:100%;
       padding: 12px;
       border-radius: 14px;
@@ -392,8 +409,7 @@
       background: rgba(255,255,255,.55);
     }
 
-    /* ✅ stato "bloccato" per input disabilitati */
-    .input[disabled]{
+    .input[disabled], .select[disabled]{
       opacity:.6;
       background: rgba(255,255,255,.35);
     }
@@ -492,6 +508,12 @@
         <button class="closeBtn" onclick="closeModal()">Chiudi</button>
       </div>
 
+      <div class="fieldLabel">Tipo</div>
+      <select class="select" id="mTipo">
+        <option value="lavoro">Lavoro</option>
+        <option value="casa">Casa</option>
+      </select>
+
       <div class="fieldLabel">Data</div>
       <input class="input" type="date" id="mData">
 
@@ -511,6 +533,11 @@
 <script>
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+  events = events.map(e => ({
+    ...e,
+    tipo: e.tipo || "lavoro"
+  }));
 
   let hideMoney = true;
 
@@ -604,11 +631,12 @@
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
+  // ✅ conteggio e colore del calendario SOLO per lavoro
   function countRemainingForDay(iso){
     if (isPastDay(iso)) return 0;
 
     const isToday = (dayKey(iso) === todayKey());
-    const dayEvents = events.filter(e => e.date === iso);
+    const dayEvents = events.filter(e => e.date === iso && (e.tipo || "lavoro") === "lavoro");
 
     if (!isToday) return dayEvents.length;
 
@@ -788,6 +816,11 @@
         ? "—"
         : euro(e.prezzo);
 
+      const tipo = e.tipo || "lavoro";
+      const typeLabel = tipo === "casa"
+        ? `<div class="eventType home">Casa</div>`
+        : `<div class="eventType work">Lavoro</div>`;
+
       row.innerHTML = `
         <div class="swipeActions">
           <button class="actionBtn edit" type="button">Modifica</button>
@@ -800,6 +833,7 @@
             <div class="eventText">
               <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
               <div class="eventSub">${hideMoney ? "" : ("€ " + priceText)}</div>
+              ${typeLabel}
             </div>
           </div>
           <div style="width:18px; opacity:.35; font-weight:900;">›</div>
@@ -867,9 +901,8 @@
     });
   }
 
-  // ===== Modal add/edit =====
   let editingId = null;
-  let editingLockedPast = false; // ✅ se true: data/ora bloccate
+  let editingLockedPast = false;
 
   function openAddModal(){
     if (isPastDay(selectedDate)) {
@@ -885,6 +918,7 @@
     document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
     document.getElementById("saveBtn").innerText = "Salva";
 
+    document.getElementById("mTipo").value = "lavoro";
     document.getElementById("mData").value = selectedDate;
     document.getElementById("mOra").value = "";
     document.getElementById("mCliente").value = "";
@@ -898,8 +932,6 @@
     if(!e) return;
 
     editingId = id;
-
-    // ✅ se è passato: blocca Data e Ora (modificabili solo Cliente + Prezzo)
     editingLockedPast = isPastDateTime(e.date, e.time);
 
     setEditLocks(editingLockedPast);
@@ -907,14 +939,13 @@
     document.getElementById("modalTitle").innerText = "Modifica appuntamento";
     document.getElementById("saveBtn").innerText = "Salva modifiche";
 
+    document.getElementById("mTipo").value = e.tipo || "lavoro";
     document.getElementById("mData").value = e.date;
     document.getElementById("mOra").value = e.time || "";
     document.getElementById("mCliente").value = e.cliente || "";
     document.getElementById("mPrezzo").value = (e.prezzo === null || e.prezzo === undefined) ? "" : e.prezzo;
 
     openModal();
-
-    // ✅ focus subito su Cliente quando modifichi un passato
     setTimeout(() => document.getElementById("mCliente").focus(), 120);
   }
 
@@ -922,17 +953,18 @@
     const dataEl = document.getElementById("mData");
     const oraEl = document.getElementById("mOra");
 
-    // lockPast=true => disabilita data/ora
     dataEl.disabled = !!lockPast;
     oraEl.disabled = !!lockPast;
   }
 
   function saveModal(){
+    const tipoEl = document.getElementById("mTipo");
     const dateEl = document.getElementById("mData");
     const timeEl = document.getElementById("mOra");
     const clienteEl = document.getElementById("mCliente");
     const prezzoEl = document.getElementById("mPrezzo");
 
+    const tipo = tipoEl.value || "lavoro";
     const date = dateEl.value;
     const time = timeEl.value;
     const cliente = clienteEl.value.trim();
@@ -952,13 +984,11 @@
       return;
     }
 
-    // ✅ se NON è lockPast, allora richiedi anche data+ora valide
     if(!editingLockedPast){
       if(!date || !time){
         alert("Compila data e ora.");
         return;
       }
-      // ✅ blocco solo per NUOVI (come prima)
       if(!editingId && isPastDateTime(date, time)) {
         alert("Non puoi inserire appuntamenti in una data/ora passata.");
         return;
@@ -968,15 +998,14 @@
     if(editingId){
       const i = events.findIndex(e => e.id === editingId);
       if(i !== -1){
-        // ✅ se lockPast: NON toccare date/time, aggiorna solo cliente+prezzo
         if(editingLockedPast){
-          events[i] = { ...events[i], cliente, prezzo };
+          events[i] = { ...events[i], tipo, cliente, prezzo };
         } else {
-          events[i] = { ...events[i], date, time, cliente, prezzo };
+          events[i] = { ...events[i], tipo, date, time, cliente, prezzo };
         }
       }
     } else {
-      events.push({ id: uid(), date, time, cliente, prezzo });
+      events.push({ id: uid(), tipo, date, time, cliente, prezzo });
     }
 
     save();
