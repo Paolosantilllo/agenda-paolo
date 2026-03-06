@@ -160,11 +160,12 @@
     .day:hover{ background: rgba(123,75,255,.06); }
     .day:active{ transform: scale(.99); }
     .day.other{ color: rgba(18,16,24,.35); }
+
     .dayNumber{
       font-weight:900;
       font-size:14px;
       position:relative;
-      z-index:2;
+      z-index:3;
     }
 
     .day.today{
@@ -172,10 +173,26 @@
       outline: 2px solid rgba(123,75,255,.18);
     }
 
+    /* selettore piccolo e centrato */
     .day.selected{
-      background: rgba(123,75,255,.14);
-      outline: 2px solid rgba(123,75,255,.30);
-      box-shadow: 0 6px 18px rgba(123,75,255,.12);
+      background: transparent;
+      outline: none;
+      box-shadow: none;
+    }
+
+    .day.selected::after{
+      content:"";
+      position:absolute;
+      left:16px;
+      top:8px;
+      width:32px;
+      height:62px;
+      border-radius:18px;
+      background: rgba(123,75,255,.10);
+      border: 2px solid rgba(123,75,255,.22);
+      box-shadow: 0 6px 18px rgba(123,75,255,.10);
+      z-index:1;
+      pointer-events:none;
     }
 
     .day.past{ opacity:.35; }
@@ -196,9 +213,26 @@
     .day.selected.level-green,
     .day.selected.level-yellow,
     .day.selected.level-red{
-      background: rgba(123,75,255,.14);
-      outline: 2px solid rgba(123,75,255,.30);
-      box-shadow: 0 6px 18px rgba(123,75,255,.12);
+      background: transparent;
+      outline: none;
+      box-shadow: none;
+    }
+
+    .day.selected.level-green::after,
+    .day.selected.level-yellow::after,
+    .day.selected.level-red::after{
+      content:"";
+      position:absolute;
+      left:16px;
+      top:8px;
+      width:32px;
+      height:62px;
+      border-radius:18px;
+      background: rgba(123,75,255,.10);
+      border: 2px solid rgba(123,75,255,.22);
+      box-shadow: 0 6px 18px rgba(123,75,255,.10);
+      z-index:1;
+      pointer-events:none;
     }
 
     /* Nuvoletta LAVORO */
@@ -265,8 +299,8 @@
     /* Nuvoletta CASA */
     .dayCountHome{
       position:absolute;
-      right:0px;
-      top:26px;
+      right:1px;
+      top:31px;
 
       min-width:14px;
       height:12px;
@@ -295,8 +329,8 @@
     .dayCountHome::before{
       content:"";
       position:absolute;
-      right:9px;
-      top:-8px;
+      right:15px;
+      top:-4px;
 
       width:2px;
       height:2px;
@@ -304,8 +338,9 @@
 
       background: var(--home);
       box-shadow:
-        -3px -3px 0 0 var(--home),
-        -6px -6px 0 0 var(--home);
+        -4px -3px 0 0 var(--home),
+        -8px -6px 0 0 var(--home);
+
       opacity:.95;
     }
 
@@ -316,6 +351,7 @@
       font-size:11px;
       font-weight:900;
       color: var(--accent);
+      z-index:3;
     }
 
     .section{ margin-top:14px; }
