@@ -181,19 +181,19 @@
     }
 
     .day.selected::after{
-      content:"";
-      position:absolute;
-      left:16px;
-      top:8px;
-      width:32px;
-      height:62px;
-      border-radius:18px;
-      background: rgba(123,75,255,.10);
-      border: 2px solid rgba(123,75,255,.22);
-      box-shadow: 0 6px 18px rgba(123,75,255,.10);
-      z-index:1;
-      pointer-events:none;
-    }
+  content:"";
+  position:absolute;
+  left:11px;
+  top:8px;
+  width:32px;
+  height:62px;
+  border-radius:18px;
+  background: rgba(123,75,255,.10);
+  border: 2px solid rgba(123,75,255,.22);
+  box-shadow: 0 6px 18px rgba(123,75,255,.10);
+  z-index:1;
+  pointer-events:none;
+}
 
     .day.past{ opacity:.35; }
 
@@ -223,7 +223,7 @@
     .day.selected.level-red::after{
       content:"";
       position:absolute;
-      left:16px;
+      left:11px;
       top:8px;
       width:32px;
       height:62px;
@@ -836,8 +836,29 @@
   }
 
   function countHomeForDay(iso){
-    return events.filter(e => e.date === iso && (e.tipo || "lavoro") === "casa").length;
+  if (isPastDay(iso)) return 0;
+
+  const isToday = (dayKey(iso) === todayKey());
+  const dayEvents = events.filter(e => e.date === iso && (e.tipo || "lavoro") === "casa");
+
+  if (!isToday) return dayEvents.length;
+
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  let remaining = 0;
+  for (const ev of dayEvents) {
+    const [hhS, mmS] = String(ev.time || "").split(":");
+    const hh = Number(hhS);
+    const mm = Number(mmS);
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) continue;
+
+    const evMinutes = hh * 60 + mm;
+    if (evMinutes > nowMinutes) remaining++;
   }
+
+  return remaining;
+}
 
   function levelFromRemaining(remaining){
     if (remaining >= 7) return "red";
