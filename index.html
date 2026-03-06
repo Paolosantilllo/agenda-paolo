@@ -1,45 +1,1307 @@
-.dayCountHome{
-  position:absolute;
-  right:-6px;
-  bottom:-3px;
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda</title>
 
-  min-width:14px;
-  height:12px;
-  padding:0 4px;
-  border-radius:999px;
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f5efff">
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  <!-- iOS standalone -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Agenda">
 
-  font-size:8px;
-  font-weight:900;
-  color:#fff;
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" href="icon.png">
 
-  background: var(--home);
-  border:1px solid rgba(255,255,255,.70);
+  <style>
+    :root{
+      --bg:#f5efff;
+      --card:#f8f3ff;
+      --text:#121018;
+      --muted:#6b7280;
+      --line:rgba(17,17,17,.08);
 
-  box-shadow:
-    0 8px 16px rgba(255,45,146,.22),
-    0 1px 0 rgba(255,255,255,.28) inset;
+      --accent:#7b4bff;
+      --danger:#ff3b30;
 
-  line-height:1;
-  z-index:5;
-}
+      --green:#34c759;
+      --yellow:#ffcc00;
+      --red:#ff3b30;
 
-.dayCountHome::before{
-  content:"";
-  position:absolute;
-  right:21px;
-  top:-5px;
+      --home:#ff2d92;
 
-  width:2px;
-  height:2px;
-  border-radius:50%;
+      --shadow: 0 10px 30px rgba(17, 12, 34, .06);
+      --shadow2: 0 1px 10px rgba(17, 12, 34, .05);
+    }
 
-  background: var(--home);
-  box-shadow:
-    5px 4px 0 0 var(--home),
-    10px 8px 0 0 var(--home);
-  opacity:.95;
-}
+    body{
+      margin:0;
+      font-family:-apple-system, system-ui, Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(245,239,255,.82);
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid var(--line);
+      padding:14px 14px 10px;
+    }
+    .topbarRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .title{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+
+    .btnIcon{
+      width:42px;
+      height:42px;
+      border:none;
+      border-radius:14px;
+      background:rgba(248,243,255,.9);
+      box-shadow: var(--shadow2);
+      font-size:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, opacity .12s ease;
+    }
+    .btnIcon:active{ transform: scale(.98); }
+    .btnIcon.moneyOff{ opacity:.55; }
+
+    .monthRow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      margin-top:10px;
+    }
+    .monthName{
+      font-size:18px;
+      font-weight:900;
+      text-transform: capitalize;
+    }
+    .navBtn{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      font-size:20px;
+      padding:8px 10px;
+      border-radius:12px;
+    }
+    .navBtn:hover{ background: rgba(0,0,0,.05); }
+
+    .monthTotal{
+      text-align:center;
+      margin-top:6px;
+      font-size:13px;
+      font-weight:900;
+      color: var(--accent);
+      letter-spacing:.1px;
+    }
+
+    .container{
+      padding: 12px 14px 90px;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .card{
+      background:rgba(248,243,255,.95);
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      border: 1px solid rgba(17,17,17,.06);
+    }
+
+    .weekdays{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 10px 10px 6px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      border-bottom:1px solid var(--line);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:0;
+      padding:6px;
+    }
+
+    .day{
+      height:56px;
+      border-radius:16px;
+      margin:4px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:flex-start;
+      padding:8px 8px;
+      cursor:pointer;
+      position:relative;
+      user-select:none;
+      transition: transform .08s ease, background .12s ease;
+    }
+    .day:hover{ background: rgba(123,75,255,.06); }
+    .day:active{ transform: scale(.99); }
+    .day.other{ color: rgba(18,16,24,.35); }
+    .dayNumber{
+      font-weight:900;
+      font-size:14px;
+      position:relative;
+      z-index:2;
+    }
+
+    .day.today{
+      background: rgba(123,75,255,.08);
+      outline: 2px solid rgba(123,75,255,.18);
+    }
+
+    .day.selected{
+      background: rgba(123,75,255,.14);
+      outline: 2px solid rgba(123,75,255,.30);
+      box-shadow: 0 6px 18px rgba(123,75,255,.12);
+    }
+
+    .day.past{ opacity:.35; }
+
+    .day.level-green{
+      background: rgba(52,199,89,.12);
+      outline: 2px solid rgba(52,199,89,.18);
+    }
+    .day.level-yellow{
+      background: rgba(255,204,0,.16);
+      outline: 2px solid rgba(255,204,0,.22);
+    }
+    .day.level-red{
+      background: rgba(255,59,48,.14);
+      outline: 2px solid rgba(255,59,48,.22);
+    }
+
+    .day.selected.level-green,
+    .day.selected.level-yellow,
+    .day.selected.level-red{
+      background: rgba(123,75,255,.14);
+      outline: 2px solid rgba(123,75,255,.30);
+      box-shadow: 0 6px 18px rgba(123,75,255,.12);
+    }
+
+    /* Nuvoletta LAVORO */
+    .dayCount{
+      position:absolute;
+      right:-7px;
+      top:-10px;
+
+      min-width:16px;
+      height:14px;
+      padding:0 5px;
+      border-radius:999px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      font-size:9px;
+      font-weight:900;
+      color:#fff;
+
+      background: var(--bubbleColor, var(--accent));
+      border:1px solid rgba(255,255,255,.70);
+
+      box-shadow:
+        0 8px 16px rgba(123,75,255,.22),
+        0 1px 0 rgba(255,255,255,.28) inset;
+
+      line-height:1;
+      z-index:5;
+    }
+
+    .dayCount::before{
+      content:"";
+      position:absolute;
+      right:24px;
+      top:22px;
+
+      width:3px;
+      height:3px;
+      border-radius:50%;
+
+      background: var(--bubbleColor, var(--accent));
+      box-shadow:
+        6px -5px 0 0 var(--bubbleColor, var(--accent)),
+        12px -10px 0 1px var(--bubbleColor, var(--accent));
+      opacity:.95;
+    }
+
+    .dayCount.level-green{
+      --bubbleColor: var(--green);
+      background: var(--green);
+    }
+    .dayCount.level-yellow{
+      --bubbleColor: var(--yellow);
+      background: var(--yellow);
+      color:#2b2300;
+    }
+    .dayCount.level-red{
+      --bubbleColor: var(--red);
+      background: var(--red);
+    }
+
+    /* Nuvoletta CASA */
+    .dayCountHome{
+      position:absolute;
+      right:0px;
+      top:26px;
+
+      min-width:14px;
+      height:12px;
+      padding:0 4px;
+      border-radius:999px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      font-size:8px;
+      font-weight:900;
+      color:#fff;
+
+      background: var(--home);
+      border:1px solid rgba(255,255,255,.70);
+
+      box-shadow:
+        0 8px 16px rgba(255,45,146,.22),
+        0 1px 0 rgba(255,255,255,.28) inset;
+
+      line-height:1;
+      z-index:5;
+    }
+
+    .dayCountHome::before{
+      content:"";
+      position:absolute;
+      right:9px;
+      top:-8px;
+
+      width:2px;
+      height:2px;
+      border-radius:50%;
+
+      background: var(--home);
+      box-shadow:
+        -3px -3px 0 0 var(--home),
+        -6px -6px 0 0 var(--home);
+      opacity:.95;
+    }
+
+    .dayTotalMini{
+      position:absolute;
+      left:6px;
+      bottom:6px;
+      font-size:11px;
+      font-weight:900;
+      color: var(--accent);
+    }
+
+    .section{ margin-top:14px; }
+    .sectionHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin:0 2px 8px;
+      gap:10px;
+    }
+    .sectionHeader h2{
+      margin:0;
+      font-size:16px;
+      font-weight:900;
+      padding-top:2px;
+    }
+
+    .totalsStack{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:2px;
+      line-height:1.05;
+      white-space:nowrap;
+      color: var(--accent);
+      font-weight:900;
+      font-size:13px;
+    }
+
+    .eventList{
+      background:rgba(248,243,255,.95);
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      border:1px solid rgba(17,17,17,.06);
+      overflow:hidden;
+    }
+
+    .swipeRow{
+      position:relative;
+      overflow:hidden;
+      border-bottom:1px solid var(--line);
+      touch-action: pan-y;
+      background: transparent;
+    }
+    .swipeRow:last-child{ border-bottom:none; }
+
+    .swipeActions{
+      position:absolute;
+      right:0;
+      top:0;
+      bottom:0;
+      width:168px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:stretch;
+      gap:8px;
+      padding:10px 10px;
+      transform: translateX(100%);
+      transition: transform .18s ease;
+      pointer-events:none;
+    }
+
+    .swipeContent{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 12px;
+      gap:12px;
+      transform: translateX(0);
+      transition: transform .18s ease;
+      background: rgba(248,243,255,.95);
+    }
+
+    .swipeRow.open .swipeActions{ transform: translateX(0); pointer-events:auto; }
+    .swipeRow.open .swipeContent{ transform: translateX(-168px); }
+
+    .eventLeft{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      min-width:0;
+    }
+    .pillTime{
+      background: rgba(123,75,255,.14);
+      color: #3f2db3;
+      font-weight:900;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .eventText{ min-width:0; }
+    .eventTitle{
+      font-weight:900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .eventSub{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .eventType{
+      display:inline-block;
+      margin-top:4px;
+      font-size:11px;
+      font-weight:900;
+      padding:3px 8px;
+      border-radius:999px;
+    }
+    .eventType.work{
+      background: rgba(52,199,89,.14);
+      color:#157a36;
+    }
+    .eventType.home{
+      background: rgba(255,45,146,.14);
+      color:#d1006b;
+    }
+
+    .swipeRow.done .swipeContent{ background: rgba(52,199,89,.10); }
+    .swipeRow.done .pillTime{
+      background: rgba(52,199,89,.16);
+      color: #0f6b2b;
+    }
+    .swipeRow.done .eventTitle{ color:#0f6b2b; }
+
+    .actionBtn{
+      border:none;
+      cursor:pointer;
+      padding:10px 10px;
+      border-radius:14px;
+      font-weight:900;
+      font-size:13px;
+      min-width:78px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .08s ease;
+    }
+    .actionBtn:active{ transform: scale(.99); }
+
+    .actionBtn.edit{
+      background: rgba(123,75,255,.14);
+      color: #3f2db3;
+      border:1px solid rgba(123,75,255,.22);
+    }
+    .actionBtn.del{
+      background: rgba(255,59,48,.14);
+      color:#c81e1e;
+      border:1px solid rgba(255,59,48,.22);
+    }
+
+    .modalBack{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:flex-end;
+      z-index:100;
+    }
+    .modal{
+      width:100%;
+      background: rgba(248,243,255,.98);
+      border-top-left-radius:24px;
+      border-top-right-radius:24px;
+      padding:14px 14px 18px;
+      box-shadow: 0 -16px 40px rgba(0,0,0,.22);
+      max-height:85vh;
+      overflow:auto;
+      border:1px solid rgba(17,17,17,.06);
+    }
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .modalTitle{
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .closeBtn{
+      border:none;
+      background: rgba(123,75,255,.10);
+      border:1px solid rgba(123,75,255,.16);
+      border-radius:12px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
+      color:#3f2db3;
+    }
+
+    .fieldLabel{
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 6px;
+      font-weight:800;
+    }
+    .input, .select{
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(17,17,17,.10);
+      font-size:16px;
+      box-sizing:border-box;
+      background: rgba(255,255,255,.55);
+    }
+
+    .input[disabled], .select[disabled]{
+      opacity:.6;
+      background: rgba(255,255,255,.35);
+    }
+
+    .primary{
+      width:100%;
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      border:none;
+      background: var(--accent);
+      color:white;
+      font-weight:900;
+      font-size:16px;
+      cursor:pointer;
+      box-shadow: 0 14px 30px rgba(123,75,255,.25);
+    }
+
+    .fab{
+      position:fixed;
+      right:16px;
+      bottom:20px;
+      width:58px;
+      height:58px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.35);
+      background: linear-gradient(180deg, rgba(123,75,255,1) 0%, rgba(98,55,255,1) 100%);
+      color:#fff;
+      font-size:30px;
+      font-weight:900;
+      box-shadow: 0 18px 40px rgba(123,75,255,.32);
+      cursor:pointer;
+      z-index:50;
+    }
+    .fab:active{ transform: scale(.98); }
+    .fab.disabled{
+      opacity:.45;
+      box-shadow:none;
+    }
+
+    @media (min-width: 720px){
+      .modalBack{
+        align-items:center;
+        justify-content:center;
+      }
+      .modal{
+        width:520px;
+        border-radius:24px;
+      }
+      .swipeRow:hover .swipeContent{ filter: brightness(0.995); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="topbarRow">
+      <div class="title">Calendario</div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
+        <button class="btnIcon" onclick="goToday()" title="Oggi">•</button>
+      </div>
+    </div>
+
+    <div class="monthRow">
+      <button class="navBtn" onclick="prevMonth()">‹</button>
+      <div class="monthName" id="monthName">—</div>
+      <button class="navBtn" onclick="nextMonth()">›</button>
+    </div>
+
+    <div class="monthTotal" id="monthTotal" style="display:none;">Totale mese: € 0.00</div>
+  </div>
+
+  <div class="container">
+    <div class="card" id="calendarCard">
+      <div class="weekdays">
+        <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+      </div>
+      <div class="grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="section">
+      <div class="sectionHeader">
+        <h2 id="selectedLabel">Appuntamenti</h2>
+
+        <div class="totalsStack">
+          <div id="selectedTotalDay">Giorno: —</div>
+          <div id="selectedTotalWeek">Settimana: —</div>
+        </div>
+      </div>
+
+      <div class="eventList" id="eventList"></div>
+      <div class="muted" style="margin-top:10px" id="emptyHint"></div>
+    </div>
+  </div>
+
+  <button class="fab" id="fabAdd" onclick="openAddModal()" title="Aggiungi">+</button>
+
+  <div class="modalBack" id="modalBack" onclick="closeModalIfBackdrop(event)">
+    <div class="modal">
+      <div class="modalHeader">
+        <div class="modalTitle" id="modalTitle">Nuovo appuntamento</div>
+        <button class="closeBtn" onclick="closeModal()">Chiudi</button>
+      </div>
+
+      <div class="fieldLabel">Tipo</div>
+      <select class="select" id="mTipo">
+        <option value="lavoro">Lavoro</option>
+        <option value="casa">Casa</option>
+      </select>
+
+      <div class="fieldLabel">Data</div>
+      <input class="input" type="date" id="mData">
+
+      <div class="fieldLabel">Ora</div>
+      <input class="input" type="time" id="mOra">
+
+      <div class="fieldLabel">Cliente / Descrizione</div>
+      <input class="input" type="text" id="mCliente" placeholder="">
+
+      <div class="fieldLabel">Prezzo (€)</div>
+      <input class="input" type="number" step="0.01" min="0" id="mPrezzo" placeholder="">
+
+      <button class="primary" id="saveBtn" onclick="saveModal()">Salva</button>
+    </div>
+  </div>
+
+<script>
+  const KEY = "agendaPaoloCalendarV1";
+  let events = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+  events = events.map(e => ({
+    ...e,
+    tipo: e.tipo || "lavoro"
+  }));
+
+  let hideMoney = true;
+
+  function toggleMoney(){
+    hideMoney = !hideMoney;
+    closeAllSwipes();
+    render();
+  }
+
+  function moneyText(value){
+    return hideMoney ? "—" : `€ ${euro(value)}`;
+  }
+
+  const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+  let viewDate = new Date();
+  let selectedDate = isoToday();
+
+  function isoToday(){ return toISO(new Date()); }
+
+  function toISO(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function parseISO(iso){
+    const [y,m,d] = iso.split("-").map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  function toISODateOnly(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function euro(n){ return (Number(n||0)).toFixed(2); }
+
+  function save(){ localStorage.setItem(KEY, JSON.stringify(events)); }
+
+  function uid(){
+    return (crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : (Date.now()+"-"+Math.random().toString(16).slice(2));
+  }
+
+  function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
+
+  function dayKey(iso){
+    const d = parseISO(iso);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function todayKey(){
+    const t = new Date();
+    t.setHours(0,0,0,0);
+    return t.getTime();
+  }
+
+  function isPastDay(iso){
+    return dayKey(iso) < todayKey();
+  }
+
+  function isPastDateTime(isoDate, hhmm){
+    const now = new Date();
+
+    const d = parseISO(isoDate);
+    d.setHours(0,0,0,0);
+
+    const t = new Date();
+    t.setHours(0,0,0,0);
+
+    if (d < t) return true;
+
+    if (d.getTime() === t.getTime()) {
+      const [hhS, mmS] = String(hhmm || "").split(":");
+      const hh = Number(hhS);
+      const mm = Number(mmS);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
+
+      const chosen = new Date();
+      chosen.setSeconds(0,0);
+      chosen.setHours(hh, mm, 0, 0);
+
+      return chosen <= now;
+    }
+
+    return false;
+  }
+
+  function updateFabState(){
+    const fab = document.getElementById("fabAdd");
+    if(!fab) return;
+
+    const disabled = isPastDay(selectedDate);
+    fab.classList.toggle("disabled", disabled);
+    fab.title = disabled ? "Non puoi aggiungere appuntamenti in una data passata" : "Aggiungi";
+  }
+
+  function totalForDay(iso){
+    return events
+      .filter(e => e.date === iso)
+      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
+  }
+
+  function countRemainingWorkForDay(iso){
+    if (isPastDay(iso)) return 0;
+
+    const isToday = (dayKey(iso) === todayKey());
+    const dayEvents = events.filter(e => e.date === iso && (e.tipo || "lavoro") === "lavoro");
+
+    if (!isToday) return dayEvents.length;
+
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    let remaining = 0;
+    for (const ev of dayEvents) {
+      const [hhS, mmS] = String(ev.time || "").split(":");
+      const hh = Number(hhS);
+      const mm = Number(mmS);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm)) continue;
+      const evMinutes = hh * 60 + mm;
+      if (evMinutes > nowMinutes) remaining++;
+    }
+    return remaining;
+  }
+
+  function countHomeForDay(iso){
+    return events.filter(e => e.date === iso && (e.tipo || "lavoro") === "casa").length;
+  }
+
+  function levelFromRemaining(remaining){
+    if (remaining >= 7) return "red";
+    if (remaining >= 4) return "yellow";
+    if (remaining >= 1) return "green";
+    return "";
+  }
+
+  function weekStartMonday(iso){
+    const d = parseISO(iso);
+    const day = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - day);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  function totalForWeek(iso){
+    const start = weekStartMonday(iso);
+    let sum = 0;
+    for(let i=0;i<7;i++){
+      const d = new Date(start);
+      d.setDate(start.getDate()+i);
+      sum += totalForDay(toISODateOnly(d));
+    }
+    return sum;
+  }
+
+  function totalForMonthView(){
+    const y = viewDate.getFullYear();
+    const m = viewDate.getMonth();
+    return events
+      .filter(e => {
+        const d = parseISO(e.date);
+        return d.getFullYear() === y && d.getMonth() === m;
+      })
+      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
+  }
+
+  function isEventDone(ev){
+    if (isPastDay(ev.date)) return true;
+    if (dayKey(ev.date) > todayKey()) return false;
+
+    const [hhS, mmS] = String(ev.time || "").split(":");
+    const hh = Number(hhS);
+    const mm = Number(mmS);
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
+
+    const now = new Date();
+    const nowMinutes = now.getHours()*60 + now.getMinutes();
+    const evMinutes = hh*60 + mm;
+
+    return evMinutes <= nowMinutes;
+  }
+
+  function render(){
+    const moneyBtn = document.getElementById("moneyBtn");
+    if (moneyBtn){
+      moneyBtn.classList.toggle("moneyOff", hideMoney);
+      moneyBtn.title = hideMoney ? "Incassi nascosti" : "Incassi visibili";
+    }
+
+    document.getElementById("monthName").innerText =
+      `${mesi[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
+    const monthTotalEl = document.getElementById("monthTotal");
+    if(monthTotalEl){
+      if(hideMoney){
+        monthTotalEl.style.display = "none";
+      } else {
+        monthTotalEl.innerText = `Totale mese: € ${euro(totalForMonthView())}`;
+        monthTotalEl.style.display = "block";
+      }
+    }
+
+    const grid = document.getElementById("calendarGrid");
+    grid.innerHTML = "";
+
+    const first = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    const firstDay = mondayIndex(first.getDay());
+    const start = new Date(first);
+    start.setDate(1 - firstDay);
+
+    const todayISO = isoToday();
+
+    for(let i=0;i<42;i++){
+      const d = new Date(start);
+      d.setDate(start.getDate()+i);
+
+      const iso = toISO(d);
+      const isOtherMonth = d.getMonth() !== viewDate.getMonth();
+      const isSelected = iso === selectedDate;
+      const isPast = isPastDay(iso);
+      const isToday = iso === todayISO;
+
+      const remainingWork = countRemainingWorkForDay(iso);
+      const homeCount = countHomeForDay(iso);
+
+      const level = levelFromRemaining(remainingWork);
+      const total = totalForDay(iso);
+      const showDayTotal = (!hideMoney && isPast && total > 0);
+
+      const levelClass = level ? ` level-${level}` : "";
+
+      const dayEl = document.createElement("div");
+      dayEl.className = "day"
+        + (isOtherMonth ? " other":"")
+        + (isToday ? " today":"")
+        + (isSelected ? " selected":"")
+        + (isPast ? " past":"")
+        + levelClass;
+
+      dayEl.onclick = () => {
+        selectedDate = iso;
+        closeAllSwipes();
+        render();
+      };
+
+      const workBadgeClass = level ? `dayCount level-${level}` : "dayCount";
+
+      dayEl.innerHTML = `
+        <div class="dayNumber">${d.getDate()}</div>
+        ${remainingWork > 0 ? `<div class="${workBadgeClass}">${remainingWork}</div>` : ""}
+        ${homeCount > 0 ? `<div class="dayCountHome">${homeCount}</div>` : ""}
+        ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
+      `;
+
+      grid.appendChild(dayEl);
+    }
+
+    updateFabState();
+    renderEventsForSelectedDay();
+  }
+
+  function renderEventsForSelectedDay(){
+    const list = document.getElementById("eventList");
+    const empty = document.getElementById("emptyHint");
+    const label = document.getElementById("selectedLabel");
+
+    const dayLine = document.getElementById("selectedTotalDay");
+    const weekLine = document.getElementById("selectedTotalWeek");
+
+    const d = parseISO(selectedDate);
+    label.innerText = `Appuntamenti • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+
+    const dayEvents = events
+      .filter(e => e.date === selectedDate)
+      .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
+
+    const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
+    const totalWeek = totalForWeek(selectedDate);
+
+    dayLine.innerText = `Giorno: ${moneyText(totalDay)}`;
+    weekLine.innerText = `Settimana: ${moneyText(totalWeek)}`;
+
+    list.innerHTML = "";
+    closeAllSwipes();
+
+    if(dayEvents.length === 0){
+      empty.innerText = "GIORNATA LIBERA";
+      return;
+    }
+    empty.innerText = "";
+
+    dayEvents.forEach(e => {
+      const row = document.createElement("div");
+      row.className = "swipeRow" + (isEventDone(e) ? " done" : "");
+      row.dataset.id = e.id;
+
+      const priceText = (e.prezzo === null || e.prezzo === undefined || e.prezzo === "")
+        ? "—"
+        : euro(e.prezzo);
+
+      const tipo = e.tipo || "lavoro";
+      const typeLabel = tipo === "casa"
+        ? `<div class="eventType home">Casa</div>`
+        : `<div class="eventType work">Lavoro</div>`;
+
+      row.innerHTML = `
+        <div class="swipeActions">
+          <button class="actionBtn edit" type="button">Modifica</button>
+          <button class="actionBtn del" type="button">Elimina</button>
+        </div>
+
+        <div class="swipeContent">
+          <div class="eventLeft">
+            <div class="pillTime">${e.time || "--:--"}</div>
+            <div class="eventText">
+              <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
+              <div class="eventSub">${hideMoney ? "" : ("€ " + priceText)}</div>
+              ${typeLabel}
+            </div>
+          </div>
+          <div style="width:18px; opacity:.35; font-weight:900;">›</div>
+        </div>
+      `;
+
+      row.querySelector(".actionBtn.edit").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openEditModal(e.id);
+      });
+
+      row.querySelector(".actionBtn.del").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        removeEvent(e.id);
+      });
+
+      attachSwipeHandlers(row);
+      list.appendChild(row);
+    });
+  }
+
+  function removeEvent(id){
+    if(!confirm("Vuoi eliminare questo appuntamento?")) return;
+    events = events.filter(e => e.id !== id);
+    save();
+    render();
+  }
+
+  function closeAllSwipes(exceptRow=null){
+    document.querySelectorAll(".swipeRow.open").forEach(r => {
+      if (exceptRow && r === exceptRow) return;
+      r.classList.remove("open");
+    });
+  }
+
+  function attachSwipeHandlers(row){
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    row.addEventListener("touchstart", (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      closeAllSwipes(row);
+    }, { passive: true });
+
+    row.addEventListener("touchmove", (e) => {
+      if(!tracking) return;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      if (Math.abs(dy) > Math.abs(dx)) tracking = false;
+    }, { passive: true });
+
+    row.addEventListener("touchend", (e) => {
+      if(!tracking) return;
+      tracking = false;
+
+      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if(!t) return;
+
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+
+      if (dx < 0) row.classList.add("open");
+      else row.classList.remove("open");
+    }, { passive: true });
+
+    row.addEventListener("click", () => {
+      if (row.classList.contains("open")) row.classList.remove("open");
+    });
+  }
+
+  let editingId = null;
+  let editingLockedPast = false;
+
+  function openAddModal(){
+    if (isPastDay(selectedDate)) {
+      alert("Non puoi aggiungere appuntamenti in una data passata.");
+      return;
+    }
+
+    editingId = null;
+    editingLockedPast = false;
+    setEditLocks(false);
+
+    document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
+    document.getElementById("saveBtn").innerText = "Salva";
+
+    document.getElementById("mTipo").value = "lavoro";
+    document.getElementById("mData").value = selectedDate;
+    document.getElementById("mOra").value = "";
+    document.getElementById("mCliente").value = "";
+    document.getElementById("mPrezzo").value = "";
+
+    openModal();
+  }
+
+  function openEditModal(id){
+    const e = events.find(x => x.id === id);
+    if(!e) return;
+
+    editingId = id;
+    editingLockedPast = isPastDateTime(e.date, e.time);
+    setEditLocks(editingLockedPast);
+
+    document.getElementById("modalTitle").innerText = "Modifica appuntamento";
+    document.getElementById("saveBtn").innerText = "Salva modifiche";
+
+    document.getElementById("mTipo").value = e.tipo || "lavoro";
+    document.getElementById("mData").value = e.date;
+    document.getElementById("mOra").value = e.time || "";
+    document.getElementById("mCliente").value = e.cliente || "";
+    document.getElementById("mPrezzo").value = (e.prezzo === null || e.prezzo === undefined) ? "" : e.prezzo;
+
+    openModal();
+    setTimeout(() => document.getElementById("mCliente").focus(), 120);
+  }
+
+  function setEditLocks(lockPast){
+    document.getElementById("mData").disabled = !!lockPast;
+    document.getElementById("mOra").disabled = !!lockPast;
+  }
+
+  function saveModal(){
+    const tipoEl = document.getElementById("mTipo");
+    const dateEl = document.getElementById("mData");
+    const timeEl = document.getElementById("mOra");
+    const clienteEl = document.getElementById("mCliente");
+    const prezzoEl = document.getElementById("mPrezzo");
+
+    const tipo = tipoEl.value || "lavoro";
+    const date = dateEl.value;
+    const time = timeEl.value;
+    const cliente = clienteEl.value.trim();
+    const prezzoRaw = prezzoEl.value;
+
+    let prezzo = null;
+    if (String(prezzoRaw).trim() !== "") {
+      prezzo = Number(prezzoRaw);
+      if (!Number.isFinite(prezzo) || prezzo < 0) {
+        alert("Il prezzo deve essere un numero valido (oppure lascialo vuoto).");
+        return;
+      }
+    }
+
+    if(!cliente){
+      alert("Inserisci il nome.");
+      return;
+    }
+
+    if(!editingLockedPast){
+      if(!date || !time){
+        alert("Compila data e ora.");
+        return;
+      }
+      if(!editingId && isPastDateTime(date, time)) {
+        alert("Non puoi inserire appuntamenti in una data/ora passata.");
+        return;
+      }
+    }
+
+    if(editingId){
+      const i = events.findIndex(e => e.id === editingId);
+      if(i !== -1){
+        if(editingLockedPast){
+          events[i] = { ...events[i], tipo, cliente, prezzo };
+        } else {
+          events[i] = { ...events[i], tipo, date, time, cliente, prezzo };
+        }
+      }
+    } else {
+      events.push({ id: uid(), tipo, date, time, cliente, prezzo });
+    }
+
+    save();
+    if(!editingLockedPast){
+      selectedDate = date;
+      viewDate = parseISO(date);
+    }
+
+    closeModal();
+    render();
+  }
+
+  function openModal(){
+    document.getElementById("modalBack").style.display = "flex";
+  }
+
+  function closeModal(){
+    document.getElementById("modalBack").style.display = "none";
+    editingLockedPast = false;
+  }
+
+  function closeModalIfBackdrop(evt){
+    if(evt.target.id === "modalBack") closeModal();
+  }
+
+  function prevMonth(){
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
+    closeAllSwipes();
+    render();
+  }
+
+  function nextMonth(){
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
+    closeAllSwipes();
+    render();
+  }
+
+  function goToday(){
+    const t = new Date();
+    viewDate = new Date(t.getFullYear(), t.getMonth(), 1);
+    selectedDate = toISO(t);
+    closeAllSwipes();
+    render();
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function enableMonthSwipe(){
+    const el = document.getElementById("calendarCard");
+    if(!el) return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    el.addEventListener("touchstart", (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    el.addEventListener("touchend", (e) => {
+      if(!tracking) return;
+      tracking = false;
+
+      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if(!t) return;
+
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+
+      if (dx < 0) nextMonth();
+      else prevMonth();
+    }, { passive: true });
+  }
+
+  function setupFocusFlow(){
+    const oraEl = document.getElementById("mOra");
+    const clienteEl = document.getElementById("mCliente");
+    const prezzoEl = document.getElementById("mPrezzo");
+
+    oraEl.addEventListener("blur", () => {
+      if (oraEl.disabled) return;
+      if (!oraEl.value) return;
+      setTimeout(() => clienteEl.focus(), 140);
+    });
+
+    clienteEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        prezzoEl.focus();
+      }
+    });
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      hideMoney = true;
+      closeAllSwipes();
+      render();
+    }
+  });
+
+  window.addEventListener("pageshow", () => {
+    hideMoney = true;
+    closeAllSwipes();
+    render();
+  });
+
+  setInterval(() => {
+    if (!document.hidden) render();
+  }, 30000);
+
+  enableMonthSwipe();
+  setupFocusFlow();
+  save();
+  render();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+    });
+  }
+</script>
+
+</body>
+</html>
