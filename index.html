@@ -262,15 +262,15 @@
   background: var(--red);
 }
 
-/* ✅ Nuvoletta CASA semplice sotto */
+/* ✅ Nuvoletta CASA sotto il giorno /
 .dayCountHome{
   position:absolute;
-  right:-10px;
-  bottom:-1px;
+  right:-6px;
+  bottom:-8px;
 
-  min-width:10px;
-  height:10px;
-  padding:0 5px;
+  min-width:16px;
+  height:14px;
+  padding:0 6px;
   border-radius:999px;
 
   display:flex;
@@ -282,7 +282,8 @@
   color:#fff;
 
   background: var(--home);
-  border:1px solid rgba(255,255,255,.70);
+
+  border:1px solid rgba(255,255,255,.75);
 
   box-shadow:
     0 8px 16px rgba(123,75,255,.22),
@@ -292,20 +293,23 @@
   z-index:5;
 }
 
+/ effetto nuvoletta */
 .dayCountHome::before{
   content:"";
   position:absolute;
-  right:20px;
-  top:-1px;
+  right:22px;
+  top:-4px;
 
   width:3px;
   height:3px;
   border-radius:50%;
 
   background: var(--home);
+
   box-shadow:
     6px 5px 0 0 var(--home),
     12px 10px 0 1px var(--home);
+
   opacity:.95;
 }
 
