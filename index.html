@@ -201,117 +201,113 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-  /* ✅ Nuvoletta LAVORO semplice */
-.dayCount{
-  position:absolute;
-  right:-7px;
-  top:-14px;
+    /* ✅ Nuvoletta LAVORO semplice */
+    .dayCount{
+      position:absolute;
+      right:-7px;
+      top:-10px;
 
-  min-width:16px;
-  height:14px;
-  padding:0 5px;
-  border-radius:999px;
+      min-width:16px;
+      height:14px;
+      padding:0 5px;
+      border-radius:999px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
 
-  font-size:9px;
-  font-weight:900;
-  color:#fff;
+      font-size:9px;
+      font-weight:900;
+      color:#fff;
 
-  background: var(--bubbleColor, var(--accent));
-  border:1px solid rgba(255,255,255,.70);
+      background: var(--bubbleColor, var(--accent));
+      border:1px solid rgba(255,255,255,.70);
 
-  box-shadow:
-    0 8px 16px rgba(123,75,255,.22),
-    0 1px 0 rgba(255,255,255,.28) inset;
+      box-shadow:
+        0 8px 16px rgba(123,75,255,.22),
+        0 1px 0 rgba(255,255,255,.28) inset;
 
-  line-height:1;
-  z-index:5;
-}
+      line-height:1;
+      z-index:5;
+    }
 
-.dayCount::before{
-  content:"";
-  position:absolute;
-  right:24px;
-  top:22px;
+    .dayCount::before{
+      content:"";
+      position:absolute;
+      right:24px;
+      top:22px;
 
-  width:3px;
-  height:3px;
-  border-radius:50%;
+      width:3px;
+      height:3px;
+      border-radius:50%;
 
-  background: var(--bubbleColor, var(--accent));
-  box-shadow:
-    6px -5px 0 0 var(--bubbleColor, var(--accent)),
-    12px -10px 0 1px var(--bubbleColor, var(--accent));
-  opacity:.95;
-}
+      background: var(--bubbleColor, var(--accent));
+      box-shadow:
+        6px -5px 0 0 var(--bubbleColor, var(--accent)),
+        12px -10px 0 1px var(--bubbleColor, var(--accent));
+      opacity:.95;
+    }
 
-.dayCount.level-green{
-  --bubbleColor: var(--green);
-  background: var(--green);
-}
-.dayCount.level-yellow{
-  --bubbleColor: var(--yellow);
-  background: var(--yellow);
-  color:#2b2300;
-}
-.dayCount.level-red{
-  --bubbleColor: var(--red);
-  background: var(--red);
-}
+    .dayCount.level-green{
+      --bubbleColor: var(--green);
+      background: var(--green);
+    }
+    .dayCount.level-yellow{
+      --bubbleColor: var(--yellow);
+      background: var(--yellow);
+      color:#2b2300;
+    }
+    .dayCount.level-red{
+      --bubbleColor: var(--red);
+      background: var(--red);
+    }
 
-/* ✅ Nuvoletta CASA sotto il giorno /
-.dayCountHome{
-  position:absolute;
-  right:-6px;
-  bottom:-8px;
+    /* ✅ Nuvoletta CASA semplice sotto - più piccola, fucsia e più in alto */
+    .dayCountHome{
+      position:absolute;
+      right:-6px;
+      bottom:-3px;
 
-  min-width:16px;
-  height:14px;
-  padding:0 6px;
-  border-radius:999px;
+      min-width:14px;
+      height:12px;
+      padding:0 4px;
+      border-radius:999px;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
 
-  font-size:9px;
-  font-weight:900;
-  color:#fff;
+      font-size:8px;
+      font-weight:900;
+      color:#fff;
 
-  background: var(--home);
+      background: var(--home);
+      border:1px solid rgba(255,255,255,.70);
 
-  border:1px solid rgba(255,255,255,.75);
+      box-shadow:
+        0 8px 16px rgba(255,45,146,.22),
+        0 1px 0 rgba(255,255,255,.28) inset;
 
-  box-shadow:
-    0 8px 16px rgba(123,75,255,.22),
-    0 1px 0 rgba(255,255,255,.28) inset;
+      line-height:1;
+      z-index:5;
+    }
 
-  line-height:1;
-  z-index:5;
-}
+    .dayCountHome::before{
+      content:"";
+      position:absolute;
+      right:21px;
+      top:-5px;
 
-/ effetto nuvoletta */
-.dayCountHome::before{
-  content:"";
-  position:absolute;
-  right:22px;
-  top:-4px;
+      width:2px;
+      height:2px;
+      border-radius:50%;
 
-  width:3px;
-  height:3px;
-  border-radius:50%;
-
-  background: var(--home);
-
-  box-shadow:
-    6px 5px 0 0 var(--home),
-    12px 10px 0 1px var(--home);
-
-  opacity:.95;
-}
+      background: var(--home);
+      box-shadow:
+        5px 4px 0 0 var(--home),
+        10px 8px 0 0 var(--home);
+      opacity:.95;
+    }
 
     .dayTotalMini{
       position:absolute;
@@ -440,8 +436,8 @@
       color:#157a36;
     }
     .eventType.home{
-      background: rgba(123,75,255,.14);
-      color:#5d2cff;
+      background: rgba(255,45,146,.14);
+      color:#d1006b;
     }
 
     .swipeRow.done .swipeContent{ background: rgba(52,199,89,.10); }
@@ -668,7 +664,6 @@
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
 
-  // migrazione vecchi eventi
   events = events.map(e => ({
     ...e,
     tipo: e.tipo || "lavoro"
@@ -926,12 +921,12 @@
 
       const workBadgeClass = level ? `dayCount level-${level}` : "dayCount";
 
-dayEl.innerHTML = `
-  <div class="dayNumber">${d.getDate()}</div>
-  ${remainingWork > 0 ? `<div class="${workBadgeClass}">${remainingWork}</div>` : ""}
-  ${homeCount > 0 ? `<div class="dayCountHome">${homeCount}</div>` : ""}
-  ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
-`;
+      dayEl.innerHTML = `
+        <div class="dayNumber">${d.getDate()}</div>
+        ${remainingWork > 0 ? `<div class="${workBadgeClass}">${remainingWork}</div>` : ""}
+        ${homeCount > 0 ? `<div class="dayCountHome">${homeCount}</div>` : ""}
+        ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
+      `;
 
       grid.appendChild(dayEl);
     }
