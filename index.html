@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agenda</title>
 
-  <!-- ✅ PWA -->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#f5efff">
 
-  <!-- ✅ iOS standalone (schermo intero) -->
+  <!-- iOS standalone -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Agenda">
@@ -32,6 +32,8 @@
       --yellow:#ffcc00;
       --red:#ff3b30;
 
+      --home:#7b4bff;
+
       --shadow: 0 10px 30px rgba(17, 12, 34, .06);
       --shadow2: 0 1px 10px rgba(17, 12, 34, .05);
     }
@@ -44,27 +46,37 @@
     }
 
     .topbar{
-      position:sticky; top:0; z-index:10;
+      position:sticky;
+      top:0;
+      z-index:10;
       background:rgba(245,239,255,.82);
       backdrop-filter: blur(14px);
       border-bottom:1px solid var(--line);
       padding:14px 14px 10px;
     }
     .topbarRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
     .title{
-      font-size:22px; font-weight:900;
+      font-size:22px;
+      font-weight:900;
       letter-spacing:.2px;
     }
 
     .btnIcon{
-      width:42px; height:42px;
-      border:none; border-radius:14px;
+      width:42px;
+      height:42px;
+      border:none;
+      border-radius:14px;
       background:rgba(248,243,255,.9);
       box-shadow: var(--shadow2);
       font-size:20px;
-      display:flex; align-items:center; justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       cursor:pointer;
       user-select:none;
       transition: transform .08s ease, opacity .12s ease;
@@ -73,16 +85,24 @@
     .btnIcon.moneyOff{ opacity:.55; }
 
     .monthRow{
-      display:flex; align-items:center; justify-content:center; gap:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
       margin-top:10px;
     }
     .monthName{
-      font-size:18px; font-weight:900;
+      font-size:18px;
+      font-weight:900;
       text-transform: capitalize;
     }
     .navBtn{
-      border:none; background:transparent; cursor:pointer;
-      font-size:20px; padding:8px 10px; border-radius:12px;
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      font-size:20px;
+      padding:8px 10px;
+      border-radius:12px;
     }
     .navBtn:hover{ background: rgba(0,0,0,.05); }
 
@@ -109,7 +129,8 @@
     }
 
     .weekdays{
-      display:grid; grid-template-columns: repeat(7, 1fr);
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
       padding: 10px 10px 6px;
       color:var(--muted);
       font-size:12px;
@@ -117,19 +138,20 @@
       border-bottom:1px solid var(--line);
     }
     .grid{
-      display:grid; grid-template-columns: repeat(7, 1fr);
-      gap: 0;
-      padding: 6px;
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:0;
+      padding:6px;
     }
 
     .day{
-      height: 56px;
-      border-radius: 16px;
-      margin: 4px;
+      height:56px;
+      border-radius:16px;
+      margin:4px;
       display:flex;
       align-items:flex-start;
       justify-content:flex-start;
-      padding: 8px 8px;
+      padding:8px 8px;
       cursor:pointer;
       position:relative;
       user-select:none;
@@ -138,7 +160,12 @@
     .day:hover{ background: rgba(123,75,255,.06); }
     .day:active{ transform: scale(.99); }
     .day.other{ color: rgba(18,16,24,.35); }
-    .dayNumber{ font-weight:900; font-size:14px; }
+    .dayNumber{
+      font-weight:900;
+      font-size:14px;
+      position:relative;
+      z-index:2;
+    }
 
     .day.today{
       background: rgba(123,75,255,.08);
@@ -151,7 +178,7 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-    .day.past{ opacity: 0.35; }
+    .day.past{ opacity:.35; }
 
     .day.level-green{
       background: rgba(52,199,89,.12);
@@ -174,57 +201,90 @@
       box-shadow: 0 6px 18px rgba(123,75,255,.12);
     }
 
-    /* Nuvoletta */
-    .dayCount{
+    /* Nuvoletta comune */
+    .cloudBadge{
+      --cloudColor: var(--accent);
       position:absolute;
-      right:-7px;
-      top:-10px;
-
-      min-width:16px;
-      height:14px;
-      padding:0 5px;
-      border-radius:999px;
-
+      min-width:20px;
+      height:16px;
+      padding:0 8px;
       display:flex;
       align-items:center;
       justify-content:center;
-
+      color:#fff;
       font-size:9px;
       font-weight:900;
-      color:#fff;
-
-      background: var(--bubbleColor, var(--accent));
-      border:1px solid rgba(255,255,255,.70);
-
-      box-shadow:
-        0 8px 16px rgba(123,75,255,.22),
-        0 1px 0 rgba(255,255,255,.28) inset;
-
       line-height:1;
-      z-index:5;
+      z-index:6;
+      background: var(--cloudColor);
+      border:1px solid rgba(255,255,255,.72);
+      border-radius:14px;
+      box-shadow:
+        0 8px 16px rgba(17,12,34,.16),
+        0 1px 0 rgba(255,255,255,.26) inset;
     }
 
-    /* Codina a cerchietti (parte dal numero del giorno verso la nuvoletta) */
-    .dayCount::before{
+    .cloudBadge::before,
+    .cloudBadge::after{
       content:"";
       position:absolute;
-      right: 24px;
-      top: 22px;
-
-      width:3px;
-      height:3px;
+      background: var(--cloudColor);
+      border:1px solid rgba(255,255,255,.72);
       border-radius:50%;
-
-      background: var(--bubbleColor, var(--accent));
-      box-shadow:
-        6px -5px 0 0 var(--bubbleColor, var(--accent)),
-        12px -10px 0 1px var(--bubbleColor, var(--accent));
-      opacity:.95;
+      box-sizing:border-box;
+      z-index:-1;
     }
 
-    .dayCount.level-green{ --bubbleColor: var(--green); background: var(--green); }
-    .dayCount.level-yellow{ --bubbleColor: var(--yellow); background: var(--yellow); color:#2b2300; }
-    .dayCount.level-red{ --bubbleColor: var(--red); background: var(--red); }
+    .cloudBadge::before{
+      width:14px;
+      height:14px;
+      left:-4px;
+      top:4px;
+    }
+
+    .cloudBadge::after{
+      width:18px;
+      height:18px;
+      right:-4px;
+      top:2px;
+    }
+
+    .cloudCore{
+      position:absolute;
+      inset:-6px 4px 2px 4px;
+      background: var(--cloudColor);
+      border:1px solid rgba(255,255,255,.72);
+      border-radius:50%;
+      z-index:-1;
+    }
+
+    .cloudTop{
+      position:absolute;
+      width:18px;
+      height:18px;
+      left:50%;
+      top:-7px;
+      transform:translateX(-50%);
+      background: var(--cloudColor);
+      border:1px solid rgba(255,255,255,.72);
+      border-radius:50%;
+      z-index:-1;
+    }
+
+    .cloudBadge.work{
+      right:-6px;
+      top:-10px;
+    }
+
+    .cloudBadge.home{
+      right:-6px;
+      bottom:-8px;
+      --cloudColor: var(--home);
+    }
+
+    .cloudBadge.level-green{ --cloudColor: var(--green); }
+    .cloudBadge.level-yellow{ --cloudColor: var(--yellow); color:#2b2300; }
+    .cloudBadge.level-red{ --cloudColor: var(--red); }
 
     .dayTotalMini{
       position:absolute;
@@ -235,11 +295,13 @@
       color: var(--accent);
     }
 
-    .section{ margin-top: 14px; }
+    .section{ margin-top:14px; }
     .sectionHeader{
-      display:flex; align-items:flex-start; justify-content:space-between;
-      margin: 0 2px 8px;
-      gap: 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin:0 2px 8px;
+      gap:10px;
     }
     .sectionHeader h2{
       margin:0;
@@ -264,7 +326,7 @@
       background:rgba(248,243,255,.95);
       border-radius:20px;
       box-shadow: var(--shadow);
-      border: 1px solid rgba(17,17,17,.06);
+      border:1px solid rgba(17,17,17,.06);
       overflow:hidden;
     }
 
@@ -279,21 +341,25 @@
 
     .swipeActions{
       position:absolute;
-      right:0; top:0; bottom:0;
-      width: 168px;
+      right:0;
+      top:0;
+      bottom:0;
+      width:168px;
       display:flex;
       justify-content:flex-end;
       align-items:stretch;
-      gap: 8px;
-      padding: 10px 10px;
+      gap:8px;
+      padding:10px 10px;
       transform: translateX(100%);
       transition: transform .18s ease;
       pointer-events:none;
     }
 
     .swipeContent{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 12px;
       gap:12px;
       transform: translateX(0);
       transition: transform .18s ease;
@@ -304,40 +370,68 @@
     .swipeRow.open .swipeContent{ transform: translateX(-168px); }
 
     .eventLeft{
-      display:flex; align-items:flex-start; gap:10px; min-width:0;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      min-width:0;
     }
     .pillTime{
       background: rgba(123,75,255,.14);
       color: #3f2db3;
       font-weight:900;
       font-size:12px;
-      padding: 6px 10px;
-      border-radius: 999px;
+      padding:6px 10px;
+      border-radius:999px;
       white-space:nowrap;
     }
     .eventText{ min-width:0; }
     .eventTitle{
       font-weight:900;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .eventSub{
       font-size:13px;
       color:var(--muted);
       margin-top:2px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .eventType{
+      display:inline-block;
+      margin-top:4px;
+      font-size:11px;
+      font-weight:900;
+      padding:3px 8px;
+      border-radius:999px;
+    }
+    .eventType.work{
+      background: rgba(52,199,89,.14);
+      color:#157a36;
+    }
+    .eventType.home{
+      background: rgba(123,75,255,.14);
+      color:#5d2cff;
     }
 
     .swipeRow.done .swipeContent{ background: rgba(52,199,89,.10); }
-    .swipeRow.done .pillTime{ background: rgba(52,199,89,.16); color: #0f6b2b; }
+    .swipeRow.done .pillTime{
+      background: rgba(52,199,89,.16);
+      color: #0f6b2b;
+    }
     .swipeRow.done .eventTitle{ color:#0f6b2b; }
 
     .actionBtn{
-      border:none; cursor:pointer;
-      padding: 10px 10px;
-      border-radius: 14px;
+      border:none;
+      cursor:pointer;
+      padding:10px 10px;
+      border-radius:14px;
       font-weight:900;
       font-size:13px;
-      min-width: 78px;
+      min-width:78px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -348,16 +442,17 @@
     .actionBtn.edit{
       background: rgba(123,75,255,.14);
       color: #3f2db3;
-      border: 1px solid rgba(123,75,255,.22);
+      border:1px solid rgba(123,75,255,.22);
     }
     .actionBtn.del{
       background: rgba(255,59,48,.14);
       color:#c81e1e;
-      border: 1px solid rgba(255,59,48,.22);
+      border:1px solid rgba(255,59,48,.22);
     }
 
     .modalBack{
-      position:fixed; inset:0;
+      position:fixed;
+      inset:0;
       background: rgba(0,0,0,.35);
       display:none;
       align-items:flex-end;
@@ -366,52 +461,62 @@
     .modal{
       width:100%;
       background: rgba(248,243,255,.98);
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      padding: 14px 14px 18px;
+      border-top-left-radius:24px;
+      border-top-right-radius:24px;
+      padding:14px 14px 18px;
       box-shadow: 0 -16px 40px rgba(0,0,0,.22);
-      max-height: 85vh;
+      max-height:85vh;
       overflow:auto;
-      border: 1px solid rgba(17,17,17,.06);
+      border:1px solid rgba(17,17,17,.06);
     }
     .modalHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
     }
-    .modalTitle{ font-size:16px; font-weight:900; }
+    .modalTitle{
+      font-size:16px;
+      font-weight:900;
+    }
 
     .closeBtn{
       border:none;
       background: rgba(123,75,255,.10);
-      border: 1px solid rgba(123,75,255,.16);
-      border-radius: 12px;
-      padding: 8px 10px;
+      border:1px solid rgba(123,75,255,.16);
+      border-radius:12px;
+      padding:8px 10px;
       cursor:pointer;
       font-weight:900;
       color:#3f2db3;
     }
 
-    .fieldLabel{ font-size:12px; color:var(--muted); margin: 10px 0 6px; font-weight:800; }
-    .input{
+    .fieldLabel{
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 6px;
+      font-weight:800;
+    }
+    .input, .select{
       width:100%;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(17,17,17,.10);
-      font-size: 16px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(17,17,17,.10);
+      font-size:16px;
       box-sizing:border-box;
       background: rgba(255,255,255,.55);
     }
 
-    .input[disabled]{
+    .input[disabled], .select[disabled]{
       opacity:.6;
       background: rgba(255,255,255,.35);
     }
 
     .primary{
       width:100%;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
       border:none;
       background: var(--accent);
       color:white;
@@ -423,26 +528,35 @@
 
     .fab{
       position:fixed;
-      right: 16px;
-      bottom: 20px;
-      width: 58px;
-      height: 58px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.35);
+      right:16px;
+      bottom:20px;
+      width:58px;
+      height:58px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.35);
       background: linear-gradient(180deg, rgba(123,75,255,1) 0%, rgba(98,55,255,1) 100%);
       color:#fff;
-      font-size: 30px;
+      font-size:30px;
       font-weight:900;
       box-shadow: 0 18px 40px rgba(123,75,255,.32);
       cursor:pointer;
       z-index:50;
     }
     .fab:active{ transform: scale(.98); }
-    .fab.disabled{ opacity: .45; box-shadow:none; }
+    .fab.disabled{
+      opacity:.45;
+      box-shadow:none;
+    }
 
     @media (min-width: 720px){
-      .modalBack{ align-items:center; justify-content:center; }
-      .modal{ width: 520px; border-radius: 24px; }
+      .modalBack{
+        align-items:center;
+        justify-content:center;
+      }
+      .modal{
+        width:520px;
+        border-radius:24px;
+      }
       .swipeRow:hover .swipeContent{ filter: brightness(0.995); }
     }
   </style>
@@ -501,13 +615,19 @@
         <button class="closeBtn" onclick="closeModal()">Chiudi</button>
       </div>
 
+      <div class="fieldLabel">Tipo</div>
+      <select class="select" id="mTipo">
+        <option value="lavoro">Lavoro</option>
+        <option value="casa">Casa</option>
+      </select>
+
       <div class="fieldLabel">Data</div>
       <input class="input" type="date" id="mData">
 
       <div class="fieldLabel">Ora</div>
       <input class="input" type="time" id="mOra">
 
-      <div class="fieldLabel">Cliente</div>
+      <div class="fieldLabel">Cliente / Descrizione</div>
       <input class="input" type="text" id="mCliente" placeholder="">
 
       <div class="fieldLabel">Prezzo (€)</div>
@@ -521,6 +641,12 @@
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
 
+  // migrazione vecchi eventi
+  events = events.map(e => ({
+    ...e,
+    tipo: e.tipo || "lavoro"
+  }));
+
   let hideMoney = true;
 
   function toggleMoney(){
@@ -528,6 +654,7 @@
     closeAllSwipes();
     render();
   }
+
   function moneyText(value){
     return hideMoney ? "—" : `€ ${euro(value)}`;
   }
@@ -537,27 +664,36 @@
   let selectedDate = isoToday();
 
   function isoToday(){ return toISO(new Date()); }
+
   function toISO(d){
     const y = d.getFullYear();
     const m = String(d.getMonth()+1).padStart(2,"0");
     const day = String(d.getDate()).padStart(2,"0");
     return `${y}-${m}-${day}`;
   }
+
   function parseISO(iso){
     const [y,m,d] = iso.split("-").map(Number);
     return new Date(y, m-1, d);
   }
+
   function toISODateOnly(d){
     const y = d.getFullYear();
     const m = String(d.getMonth()+1).padStart(2,"0");
     const day = String(d.getDate()).padStart(2,"0");
     return `${y}-${m}-${day}`;
   }
+
   function euro(n){ return (Number(n||0)).toFixed(2); }
+
   function save(){ localStorage.setItem(KEY, JSON.stringify(events)); }
+
   function uid(){
-    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2));
+    return (crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : (Date.now()+"-"+Math.random().toString(16).slice(2));
   }
+
   function mondayIndex(jsDay){ return (jsDay + 6) % 7; }
 
   function dayKey(iso){
@@ -565,11 +701,13 @@
     d.setHours(0,0,0,0);
     return d.getTime();
   }
+
   function todayKey(){
     const t = new Date();
     t.setHours(0,0,0,0);
     return t.getTime();
   }
+
   function isPastDay(iso){
     return dayKey(iso) < todayKey();
   }
@@ -597,27 +735,30 @@
 
       return chosen <= now;
     }
+
     return false;
   }
 
   function updateFabState(){
     const fab = document.getElementById("fabAdd");
     if(!fab) return;
+
     const disabled = isPastDay(selectedDate);
     fab.classList.toggle("disabled", disabled);
     fab.title = disabled ? "Non puoi aggiungere appuntamenti in una data passata" : "Aggiungi";
   }
 
   function totalForDay(iso){
-    return events.filter(e => e.date === iso)
+    return events
+      .filter(e => e.date === iso)
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  function countRemainingForDay(iso){
+  function countRemainingWorkForDay(iso){
     if (isPastDay(iso)) return 0;
 
     const isToday = (dayKey(iso) === todayKey());
-    const dayEvents = events.filter(e => e.date === iso);
+    const dayEvents = events.filter(e => e.date === iso && (e.tipo || "lavoro") === "lavoro");
 
     if (!isToday) return dayEvents.length;
 
@@ -636,6 +777,10 @@
     return remaining;
   }
 
+  function countHomeForDay(iso){
+    return events.filter(e => e.date === iso && (e.tipo || "lavoro") === "casa").length;
+  }
+
   function levelFromRemaining(remaining){
     if (remaining >= 7) return "red";
     if (remaining >= 4) return "yellow";
@@ -650,6 +795,7 @@
     d.setHours(0,0,0,0);
     return d;
   }
+
   function totalForWeek(iso){
     const start = weekStartMonday(iso);
     let sum = 0;
@@ -664,10 +810,12 @@
   function totalForMonthView(){
     const y = viewDate.getFullYear();
     const m = viewDate.getMonth();
-    return events.filter(e => {
-      const d = parseISO(e.date);
-      return d.getFullYear() === y && d.getMonth() === m;
-    }).reduce((s,e)=> s + Number(e.prezzo||0), 0);
+    return events
+      .filter(e => {
+        const d = parseISO(e.date);
+        return d.getFullYear() === y && d.getMonth() === m;
+      })
+      .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
   function isEventDone(ev){
@@ -726,9 +874,10 @@
       const isPast = isPastDay(iso);
       const isToday = iso === todayISO;
 
-      const remaining = countRemainingForDay(iso);
-      const level = levelFromRemaining(remaining);
+      const remainingWork = countRemainingWorkForDay(iso);
+      const homeCount = countHomeForDay(iso);
 
+      const level = levelFromRemaining(remainingWork);
       const total = totalForDay(iso);
       const showDayTotal = (!hideMoney && isPast && total > 0);
 
@@ -742,13 +891,33 @@
         + (isPast ? " past":"")
         + levelClass;
 
-      dayEl.onclick = () => { selectedDate = iso; closeAllSwipes(); render(); };
+      dayEl.onclick = () => {
+        selectedDate = iso;
+        closeAllSwipes();
+        render();
+      };
 
-      const badgeClass = level ? `dayCount level-${level}` : "dayCount";
+      const workBadgeClass = level ? `cloudBadge work level-${level}` : "cloudBadge work";
 
       dayEl.innerHTML = `
         <div class="dayNumber">${d.getDate()}</div>
-        ${remaining > 0 ? `<div class="${badgeClass}">${remaining}</div>` : ""}
+
+        ${remainingWork > 0 ? `
+          <div class="${workBadgeClass}">
+            <span class="cloudCore"></span>
+            <span class="cloudTop"></span>
+            ${remainingWork}
+          </div>
+        ` : ""}
+
+        ${homeCount > 0 ? `
+          <div class="cloudBadge home">
+            <span class="cloudCore"></span>
+            <span class="cloudTop"></span>
+            ${homeCount}
+          </div>
+        ` : ""}
+
         ${showDayTotal ? `<div class="dayTotalMini">€${euro(total)}</div>` : ""}
       `;
 
@@ -770,7 +939,8 @@
     const d = parseISO(selectedDate);
     label.innerText = `Appuntamenti • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
 
-    const dayEvents = events.filter(e => e.date === selectedDate)
+    const dayEvents = events
+      .filter(e => e.date === selectedDate)
       .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
 
     const totalDay = dayEvents.reduce((s,e)=> s + Number(e.prezzo||0), 0);
@@ -797,6 +967,11 @@
         ? "—"
         : euro(e.prezzo);
 
+      const tipo = e.tipo || "lavoro";
+      const typeLabel = tipo === "casa"
+        ? `<div class="eventType home">Casa</div>`
+        : `<div class="eventType work">Lavoro</div>`;
+
       row.innerHTML = `
         <div class="swipeActions">
           <button class="actionBtn edit" type="button">Modifica</button>
@@ -809,14 +984,22 @@
             <div class="eventText">
               <div class="eventTitle">${escapeHtml(e.cliente || "Cliente")}</div>
               <div class="eventSub">${hideMoney ? "" : ("€ " + priceText)}</div>
+              ${typeLabel}
             </div>
           </div>
           <div style="width:18px; opacity:.35; font-weight:900;">›</div>
         </div>
       `;
 
-      row.querySelector(".actionBtn.edit").addEventListener("click", (ev) => { ev.stopPropagation(); openEditModal(e.id); });
-      row.querySelector(".actionBtn.del").addEventListener("click", (ev) => { ev.stopPropagation(); removeEvent(e.id); });
+      row.querySelector(".actionBtn.edit").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openEditModal(e.id);
+      });
+
+      row.querySelector(".actionBtn.del").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        removeEvent(e.id);
+      });
 
       attachSwipeHandlers(row);
       list.appendChild(row);
@@ -838,7 +1021,9 @@
   }
 
   function attachSwipeHandlers(row){
-    let startX = 0, startY = 0, tracking = false;
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
 
     row.addEventListener("touchstart", (e) => {
       if (!e.touches || e.touches.length !== 1) return;
@@ -876,7 +1061,6 @@
     });
   }
 
-  // ===== Modal add/edit =====
   let editingId = null;
   let editingLockedPast = false;
 
@@ -893,16 +1077,13 @@
     document.getElementById("modalTitle").innerText = "Nuovo appuntamento";
     document.getElementById("saveBtn").innerText = "Salva";
 
+    document.getElementById("mTipo").value = "lavoro";
     document.getElementById("mData").value = selectedDate;
     document.getElementById("mOra").value = "";
     document.getElementById("mCliente").value = "";
     document.getElementById("mPrezzo").value = "";
 
     openModal();
-
-    // ✅ NON mettere focus su Ora da solo (così non “auto conferma”)
-    // Se vuoi, puoi lasciare tutto senza focus, oppure mettere su Ora:
-    // setTimeout(()=>document.getElementById("mOra").focus(), 120);
   }
 
   function openEditModal(id){
@@ -910,22 +1091,19 @@
     if(!e) return;
 
     editingId = id;
-
-    // se è passato: blocca Data e Ora
     editingLockedPast = isPastDateTime(e.date, e.time);
     setEditLocks(editingLockedPast);
 
     document.getElementById("modalTitle").innerText = "Modifica appuntamento";
     document.getElementById("saveBtn").innerText = "Salva modifiche";
 
+    document.getElementById("mTipo").value = e.tipo || "lavoro";
     document.getElementById("mData").value = e.date;
     document.getElementById("mOra").value = e.time || "";
     document.getElementById("mCliente").value = e.cliente || "";
     document.getElementById("mPrezzo").value = (e.prezzo === null || e.prezzo === undefined) ? "" : e.prezzo;
 
     openModal();
-
-    // focus su Cliente quando modifichi (soprattutto se passato)
     setTimeout(() => document.getElementById("mCliente").focus(), 120);
   }
 
@@ -935,11 +1113,13 @@
   }
 
   function saveModal(){
+    const tipoEl = document.getElementById("mTipo");
     const dateEl = document.getElementById("mData");
     const timeEl = document.getElementById("mOra");
     const clienteEl = document.getElementById("mCliente");
     const prezzoEl = document.getElementById("mPrezzo");
 
+    const tipo = tipoEl.value || "lavoro";
     const date = dateEl.value;
     const time = timeEl.value;
     const cliente = clienteEl.value.trim();
@@ -955,7 +1135,7 @@
     }
 
     if(!cliente){
-      alert("Inserisci il nome cliente.");
+      alert("Inserisci il nome.");
       return;
     }
 
@@ -974,13 +1154,13 @@
       const i = events.findIndex(e => e.id === editingId);
       if(i !== -1){
         if(editingLockedPast){
-          events[i] = { ...events[i], cliente, prezzo };
+          events[i] = { ...events[i], tipo, cliente, prezzo };
         } else {
-          events[i] = { ...events[i], date, time, cliente, prezzo };
+          events[i] = { ...events[i], tipo, date, time, cliente, prezzo };
         }
       }
     } else {
-      events.push({ id: uid(), date, time, cliente, prezzo });
+      events.push({ id: uid(), tipo, date, time, cliente, prezzo });
     }
 
     save();
@@ -993,23 +1173,31 @@
     render();
   }
 
-  function openModal(){ document.getElementById("modalBack").style.display = "flex"; }
+  function openModal(){
+    document.getElementById("modalBack").style.display = "flex";
+  }
+
   function closeModal(){
     document.getElementById("modalBack").style.display = "none";
     editingLockedPast = false;
   }
-  function closeModalIfBackdrop(evt){ if(evt.target.id === "modalBack") closeModal(); }
+
+  function closeModalIfBackdrop(evt){
+    if(evt.target.id === "modalBack") closeModal();
+  }
 
   function prevMonth(){
     viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
     closeAllSwipes();
     render();
   }
+
   function nextMonth(){
     viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1);
     closeAllSwipes();
     render();
   }
+
   function goToday(){
     const t = new Date();
     viewDate = new Date(t.getFullYear(), t.getMonth(), 1);
@@ -1031,7 +1219,9 @@
     const el = document.getElementById("calendarCard");
     if(!el) return;
 
-    let startX = 0, startY = 0, tracking = false;
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
 
     el.addEventListener("touchstart", (e) => {
       if (!e.touches || e.touches.length !== 1) return;
@@ -1057,26 +1247,17 @@
     }, { passive: true });
   }
 
-  // ✅ Focus flow:
-  // - dopo conferma ora (tasto blu “Fine” su iPhone) => il time input perde focus => focus su Cliente
-  // - dopo “Invio” su Cliente => focus su Prezzo
   function setupFocusFlow(){
     const oraEl = document.getElementById("mOra");
     const clienteEl = document.getElementById("mCliente");
     const prezzoEl = document.getElementById("mPrezzo");
 
-    // Quando si “chiude” il picker ora (Fine), l’input perde focus => blur
     oraEl.addEventListener("blur", () => {
-      // Se è disabilitato (modifica passato), non fare niente
       if (oraEl.disabled) return;
-
-      // Se NON hai scelto un'ora, non spostare il cursore
       if (!oraEl.value) return;
-
       setTimeout(() => clienteEl.focus(), 140);
     });
 
-    // Cliente -> Prezzo con Invio
     clienteEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -1092,6 +1273,7 @@
       render();
     }
   });
+
   window.addEventListener("pageshow", () => {
     hideMoney = true;
     closeAllSwipes();
@@ -1104,9 +1286,9 @@
 
   enableMonthSwipe();
   setupFocusFlow();
+  save();
   render();
 
-  // ✅ Service Worker (offline)
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
