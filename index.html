@@ -174,26 +174,26 @@
     }
 
     /* selettore piccolo del giorno */
-    .day.selected{
-      background: transparent;
-      outline: none;
-      box-shadow: none;
-    }
+   .day.selected{
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+}
 
-    .day.selected::after{
-      content:"";
-      position:absolute;
-      left:10px;
-      top:6px;
-      width:42px;
-      height:74px;
-      border-radius:22px;
-      background: rgba(123,75,255,.10);
-      border: 2px solid rgba(123,75,255,.22);
-      box-shadow: 0 6px 18px rgba(123,75,255,.10);
-      z-index:1;
-      pointer-events:none;
-    }
+.day.selected::after{
+  content:"";
+  position:absolute;
+  left:16px;              /* più centrato */
+  top:8px;                /* leggermente più giù */
+  width:32px;             /* più piccolo */
+  height:62px;            /* più piccolo */
+  border-radius:18px;
+  background: rgba(123,75,255,.10);
+  border: 2px solid rgba(123,75,255,.22);
+  box-shadow: 0 6px 18px rgba(123,75,255,.10);
+  z-index:1;
+  pointer-events:none;
+}
 
     .day.past{ opacity:.35; }
 
