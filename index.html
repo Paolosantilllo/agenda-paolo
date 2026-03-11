@@ -49,6 +49,30 @@
       letter-spacing:.2px;
     }
 
+    .saveDot,
+    .restoreDot{
+      width:26px;
+      height:26px;
+      border:none;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:900;
+      color:#fff;
+      cursor:pointer;
+      box-shadow: var(--shadow2);
+      padding:0;
+      flex:0 0 auto;
+    }
+    .saveDot{
+      background:#34c759;
+    }
+    .restoreDot{
+      background:#ff3b30;
+    }
+
     .btnIcon{
       width:42px; height:42px;
       border:none; border-radius:14px;
@@ -459,7 +483,11 @@
 
   <div class="topbar">
     <div class="topbarRow">
-      <div class="title">Calendario</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="title">Calendario</div>
+        <button class="saveDot" onclick="exportBackup()" title="Salva">S</button>
+        <button class="restoreDot" onclick="triggerImportBackup()" title="Ripristina">R</button>
+      </div>
 
       <div style="display:flex; gap:10px;">
         <button class="btnIcon" id="moneyBtn" onclick="toggleMoney()" title="Mostra/Nascondi incassi">€</button>
@@ -530,6 +558,8 @@
     </div>
   </div>
 
+  <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none">
+
 <script>
   const KEY = "agendaPaoloCalendarV1";
   let events = JSON.parse(localStorage.getItem(KEY) || "[]");
@@ -540,6 +570,101 @@
   }));
 
   let hideMoney = true;
+
+  function exportBackup(){
+    try {
+      const payload = {
+        app: "Agenda",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        events: events
+      };
+
+      const blob = new Blob(
+        [JSON.stringify(payload, null, 2)],
+        { type: "application/json" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+
+      a.href = url;
+      a.download = `agenda-backup-${yyyy}-${mm}-${dd}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Errore durante il salvataggio.");
+      console.error(err);
+    }
+  }
+
+  function triggerImportBackup(){
+    const input = document.getElementById("backupFileInput");
+    if (!input) return;
+    input.value = "";
+    input.click();
+  }
+
+  function importBackupFromFile(file){
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+      try {
+        const raw = e.target.result;
+        const parsed = JSON.parse(raw);
+
+        let importedEvents = [];
+
+        if (Array.isArray(parsed)) {
+          importedEvents = parsed;
+        } else if (parsed && Array.isArray(parsed.events)) {
+          importedEvents = parsed.events;
+        } else {
+          alert("File non valido.");
+          return;
+        }
+
+        importedEvents = importedEvents.map(ev => ({
+          id: ev.id || uid(),
+          tipo: ev.tipo || "lavoro",
+          date: ev.date || "",
+          time: ev.time || "",
+          cliente: ev.cliente || "",
+          prezzo: (ev.prezzo === "" || ev.prezzo === undefined) ? null : ev.prezzo
+        }));
+
+        if (!confirm("Ripristinando il file verranno sostituiti gli appuntamenti attuali. Vuoi continuare?")) {
+          return;
+        }
+
+        events = importedEvents;
+        save();
+        closeAllSwipes();
+        render();
+
+        alert("Ripristino completato.");
+      } catch (err) {
+        alert("Errore nel file selezionato.");
+        console.error(err);
+      }
+    };
+
+    reader.onerror = function(){
+      alert("Impossibile leggere il file.");
+    };
+
+    reader.readAsText(file);
+  }
 
   function toggleMoney(){
     hideMoney = !hideMoney;
@@ -631,7 +756,6 @@
       .reduce((s,e)=> s + Number(e.prezzo||0), 0);
   }
 
-  // ✅ conteggio e colore del calendario SOLO per lavoro
   function countRemainingForDay(iso){
     if (isPastDay(iso)) return 0;
 
@@ -1080,6 +1204,11 @@
     }, { passive: true });
   }
 
+  document.getElementById("backupFileInput").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    importBackupFromFile(file);
+  });
+
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       hideMoney = true;
@@ -1102,4 +1231,4 @@
 </script>
 
 </body>
-</html> 
+</html>
