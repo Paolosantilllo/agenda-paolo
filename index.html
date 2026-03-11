@@ -571,40 +571,45 @@
 
   let hideMoney = true;
 
-  function exportBackup(){
-    try {
-      const payload = {
-        app: "Agenda",
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        events: events
-      };
+function exportBackup(){
+  try {
+    const payload = {
+      app: "Agenda",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      events: events
+    };
 
-      const blob = new Blob(
-        [JSON.stringify(payload, null, 2)],
-        { type: "application/json" }
-      );
+    const blob = new Blob(
+      [JSON.stringify(payload, null, 2)],
+      { type: "application/json" }
+    );
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
 
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const dd = String(today.getDate()).padStart(2, "0");
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
 
-      a.href = url;
-      a.download = `agenda-backup-${yyyy}-${mm}-${dd}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    a.href = url;
+    a.download = `agenda-backup-${yyyy}-${mm}-${dd}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      alert("Errore durante il salvataggio.");
-      console.error(err);
-    }
+    URL.revokeObjectURL(url);
+
+    setTimeout(() => {
+      alert("Backup salvato con successo.");
+    }, 200);
+
+  } catch (err) {
+    alert("Errore durante il salvataggio.");
+    console.error(err);
   }
+}
 
   function triggerImportBackup(){
     const input = document.getElementById("backupFileInput");
@@ -613,58 +618,59 @@
     input.click();
   }
 
-  function importBackupFromFile(file){
-    if (!file) return;
+function importBackupFromFile(file){
+  if (!file) return;
 
-    const reader = new FileReader();
+  const reader = new FileReader();
 
-    reader.onload = function(e){
-      try {
-        const raw = e.target.result;
-        const parsed = JSON.parse(raw);
+  reader.onload = function(e){
+    try {
+      const raw = e.target.result;
+      const parsed = JSON.parse(raw);
 
-        let importedEvents = [];
+      let importedEvents = [];
 
-        if (Array.isArray(parsed)) {
-          importedEvents = parsed;
-        } else if (parsed && Array.isArray(parsed.events)) {
-          importedEvents = parsed.events;
-        } else {
-          alert("File non valido.");
-          return;
-        }
-
-        importedEvents = importedEvents.map(ev => ({
-          id: ev.id || uid(),
-          tipo: ev.tipo || "lavoro",
-          date: ev.date || "",
-          time: ev.time || "",
-          cliente: ev.cliente || "",
-          prezzo: (ev.prezzo === "" || ev.prezzo === undefined) ? null : ev.prezzo
-        }));
-
-        if (!confirm("Ripristinando il file verranno sostituiti gli appuntamenti attuali. Vuoi continuare?")) {
-          return;
-        }
-
-        events = importedEvents;
-        save();
-        closeAllSwipes();
-        render();
-
-        alert("Ripristino completato.");
-      } catch (err) {
-        alert("Errore nel file selezionato.");
-        console.error(err);
+      if (Array.isArray(parsed)) {
+        importedEvents = parsed;
+      } else if (parsed && Array.isArray(parsed.events)) {
+        importedEvents = parsed.events;
+      } else {
+        alert("File non valido.");
+        return;
       }
-    };
 
-    reader.onerror = function(){
-      alert("Impossibile leggere il file.");
-    };
+      importedEvents = importedEvents.map(ev => ({
+        id: ev.id || uid(),
+        tipo: ev.tipo || "lavoro",
+        date: ev.date || "",
+        time: ev.time || "",
+        cliente: ev.cliente || "",
+        prezzo: (ev.prezzo === "" || ev.prezzo === undefined) ? null : ev.prezzo
+      }));
 
-    reader.readAsText(file);
-  }
+      if (!confirm("Ripristinando il file verranno sostituiti gli appuntamenti attuali. Vuoi continuare?")) {
+        return;
+      }
+
+      events = importedEvents;
+      save();
+      closeAllSwipes();
+      render();
+
+      alert("Ripristino completato con successo.");
+
+    } catch (err) {
+      alert("Errore nel file selezionato.");
+      console.error(err);
+    }
+  };
+
+  reader.onerror = function(){
+    alert("Impossibile leggere il file.");
+  };
+
+  reader.readAsText(file);
+}
 
   function toggleMoney(){
     hideMoney = !hideMoney;
